@@ -46,6 +46,42 @@ th { background:#e8edf3; }
 .modal-controls button { background:white; color:#1f3b57; font-weight:bold; margin:0 10px; }
 .modal-counter { color:white; margin-top:10px; font-size:14px; }
 
+
+.login-overlay {
+ position: fixed;
+ z-index: 10000;
+ left: 0;
+ top: 0;
+ width: 100%;
+ height: 100%;
+ background: #1f3b57;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+}
+.login-box {
+ background: white;
+ width: min(420px, 92%);
+ padding: 24px;
+ border-radius: 12px;
+ box-shadow: 0 4px 18px rgba(0,0,0,.35);
+}
+.login-box h2 {
+ margin-top: 0;
+ color: #1f3b57;
+}
+.login-error {
+ color: #a82626;
+ font-weight: bold;
+ margin-top: 10px;
+ min-height: 20px;
+}
+.login-note {
+ font-size: 12px;
+ color: #555;
+ margin-top: 12px;
+}
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -56,6 +92,29 @@ th { background:#e8edf3; }
 </style>
 </head>
 <body>
+
+<div id="loginOverlay" class="login-overlay">
+ <div class="login-box">
+  <h2>SchulManager Login</h2>
+  <p>Bitte Zugangsdaten eingeben.</p>
+
+  <label>Benutzername</label>
+  <input type="text" id="loginUser" autocomplete="username" placeholder="Benutzername">
+
+  <label>Passwort</label>
+  <input type="password" id="loginPass" autocomplete="current-password" placeholder="Passwort">
+
+  <label style="font-weight:normal; margin-top:12px;">
+   <input type="checkbox" id="loginRemember" style="width:auto; margin-right:6px;">
+   Angemeldet bleiben
+  </label>
+
+  <button class="success" onclick="loginPruefen()">Einloggen</button>
+  <div id="loginError" class="login-error"></div>
+  <p class="login-note">Hinweis: Dieser einfache Passwortschutz schützt die App-Oberfläche. Für vollständige Datenbanksicherheit sollte später Firebase Authentication aktiviert werden.</p>
+ </div>
+</div>
+
 <header>
 <h1>SchulManager – Hausmeisterportal Cloud v1.1</h1>
 <p>Gemeinsame Meldungen mit Fotodokumentation</p>
@@ -155,6 +214,7 @@ th { background:#e8edf3; }
 <option>Sonstiges</option>
 </select>
 <button onclick="window.print()">Drucken / PDF</button>
+<button onclick="abmelden()">Abmelden</button>
 <button onclick="exportJSON()">Sicherung exportieren inkl. Fotos</button>
 <label style="display:inline;font-weight:normal;"><input class="hidden" type="file" id="importDatei" accept=".json" onchange="importJSON(event)"><button onclick="document.getElementById('importDatei').click()">Sicherung importieren inkl. Fotos</button></label>
 </div>
@@ -199,6 +259,47 @@ import {
   orderBy,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+
+const LOGIN_USER = "GSR-Hausmeister";
+const LOGIN_PASS = "GSR2026";
+const LOGIN_KEY = "schulmanagerLoginOK";
+
+function loginStart() {
+ const overlay = document.getElementById("loginOverlay");
+ if (localStorage.getItem(LOGIN_KEY) === "true") {
+  overlay.style.display = "none";
+  return;
+ }
+ overlay.style.display = "flex";
+ setTimeout(() => document.getElementById("loginUser").focus(), 200);
+}
+
+window.loginPruefen = function() {
+ const user = document.getElementById("loginUser").value.trim();
+ const pass = document.getElementById("loginPass").value;
+ const remember = document.getElementById("loginRemember").checked;
+
+ if (user === LOGIN_USER && pass === LOGIN_PASS) {
+  if (remember) {
+   localStorage.setItem(LOGIN_KEY, "true");
+  } else {
+   sessionStorage.setItem(LOGIN_KEY, "true");
+  }
+  document.getElementById("loginOverlay").style.display = "none";
+  document.getElementById("loginError").textContent = "";
+ } else {
+  document.getElementById("loginError").textContent = "Benutzername oder Passwort falsch.";
+ }
+};
+
+document.addEventListener("keydown", function(event) {
+ const overlay = document.getElementById("loginOverlay");
+ if (overlay && overlay.style.display !== "none" && event.key === "Enter") {
+  loginPruefen();
+ }
+});
+
 
 const firebaseConfig = {
   "apiKey": "AIzaSyAUjkgBQ0H5efnzve0YCSmph8mKEqbCNzk",
@@ -509,7 +610,8 @@ function formularLeeren() {
  document.getElementById("speicherButton").textContent = "Meldung speichern";
  document.getElementById("abbrechenButton").classList.add("hidden");
  document.getElementById("formularTitel").textContent = "Neue Meldung erfassen";
- heuteSetzen();
+ loginStart();
+heuteSetzen();
  schadenAuswahlAktualisieren();
 }
 
@@ -662,6 +764,16 @@ document.addEventListener("keydown", function(event) {
  if (event.key === "ArrowLeft") fotoZurueck();
 });
 
+
+window.abmelden = function() {
+ localStorage.removeItem(LOGIN_KEY);
+ sessionStorage.removeItem(LOGIN_KEY);
+ document.getElementById("loginUser").value = "";
+ document.getElementById("loginPass").value = "";
+ document.getElementById("loginRemember").checked = false;
+ document.getElementById("loginOverlay").style.display = "flex";
+};
+
 function escapeHtml(text) {
  return String(text)
   .replaceAll("&","&amp;")
@@ -673,6 +785,7 @@ function escapeHtml(text) {
 
 document.getElementById("bereichTyp").addEventListener("change", () => schadenAuswahlAktualisieren());
 
+loginStart();
 heuteSetzen();
 schadenAuswahlAktualisieren();
 fotoVorschauAktualisieren();
