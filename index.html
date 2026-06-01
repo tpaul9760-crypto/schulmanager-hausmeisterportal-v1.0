@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal Cloud v1.1</title>
+<title>SchulManager – Hausmeisterportal Mobile v1.2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -82,6 +82,57 @@ th { background:#e8edf3; }
  margin-top: 12px;
 }
 
+
+.mobile-card-list { display: none; }
+.mobile-entry-card {
+ background: white;
+ border: 1px solid #ccc;
+ border-radius: 10px;
+ padding: 14px;
+ margin-bottom: 14px;
+ box-shadow: 0 2px 6px rgba(0,0,0,.08);
+}
+.mobile-entry-card h3 {
+ margin: 0 0 8px 0;
+ color: #1f3b57;
+ font-size: 18px;
+}
+.mobile-row { margin: 6px 0; font-size: 15px; }
+.mobile-row b { color: #1f3b57; }
+.mobile-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+.mobile-actions button { flex: 1; min-width: 120px; }
+
+@media (max-width: 760px) {
+ body { font-size: 16px; }
+ header { padding: 14px 10px; }
+ header h1 { font-size: 22px; margin-bottom: 6px; }
+ header p { font-size: 14px; margin: 0; }
+ main { padding: 10px; }
+ .card { padding: 14px; border-radius: 10px; margin-bottom: 14px; }
+ h2 { font-size: 20px; }
+ label { font-size: 16px; }
+ input, textarea, select { font-size: 16px; padding: 12px; min-height: 46px; }
+ textarea { min-height: 100px; }
+ button { width: 100%; min-height: 50px; font-size: 16px; margin: 6px 0; }
+ .toolbar { display: block; }
+ .toolbar input, .toolbar select, .toolbar button, .toolbar label {
+  width: 100% !important;
+  max-width: none !important;
+  display: block !important;
+  margin-bottom: 8px;
+ }
+ .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+ .stat { padding: 10px; font-size: 14px; }
+ .stat span { font-size: 24px; }
+ table { display: none; }
+ .mobile-card-list { display: block; }
+ .drop-zone { padding: 22px 12px; font-size: 16px; }
+ .photo-preview img, .entry-photo { max-width: 82px; max-height: 82px; }
+ .login-box { width: 92%; padding: 20px; }
+ .login-box button { width: 100%; }
+ .notice { font-size: 14px; }
+}
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -116,8 +167,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal Cloud v1.1</h1>
-<p>Gemeinsame Meldungen mit Fotodokumentation</p>
+<h1>SchulManager – Hausmeisterportal Mobile v1.2</h1>
+<p>Mobile optimierte Meldungen mit Fotodokumentation</p>
 </header>
 
 <main>
@@ -231,6 +282,7 @@ th { background:#e8edf3; }
 </thead>
 <tbody id="liste"></tbody>
 </table>
+<div id="mobileListe" class="mobile-card-list"></div>
 </section>
 
 <div id="photoModal" class="photo-modal no-print" onclick="modalHintergrundSchliessen(event)">
@@ -625,7 +677,9 @@ window.anzeigen = function() {
 
  document.getElementById("anzahl").textContent = "Anzahl Meldungen: " + liste.length;
  const tbody = document.getElementById("liste");
+ const mobileListe = document.getElementById("mobileListe");
  tbody.innerHTML = "";
+ if (mobileListe) mobileListe.innerHTML = "";
 
  liste.forEach((e, index) => {
   const nummer = "M-" + String(liste.length - index).padStart(4, "0");
@@ -645,6 +699,26 @@ window.anzeigen = function() {
     <button class="danger" onclick="loeschen('${e.id}')">Löschen</button>
    </td>`;
   tbody.appendChild(tr);
+
+  if (mobileListe) {
+   const card = document.createElement("div");
+   card.className = "mobile-entry-card";
+   card.innerHTML = `
+    <h3>${nummer} – ${escapeHtml(e.titel || "")}</h3>
+    <div class="mobile-row"><b>Datum:</b> ${escapeHtml(e.datum || "")} ${escapeHtml(e.uhrzeit || "")}</div>
+    <div class="mobile-row"><b>Bereich:</b> ${escapeHtml(e.bereichTyp || "")}</div>
+    <div class="mobile-row"><b>Ort:</b> ${escapeHtml(e.ort || "")}</div>
+    <div class="mobile-row"><b>Beschreibung:</b><br>${escapeHtml(e.beschreibung || "")}</div>
+    <div class="mobile-row"><b>Maßnahme / Notiz:</b><br>${escapeHtml(e.massnahme || "")}</div>
+    <div class="mobile-row"><b>Gemeldet:</b> ${escapeHtml(e.gemeldetVon || "")}</div>
+    <div class="mobile-row"><b>Bearbeitet:</b> ${escapeHtml(e.bearbeitetVon || "")}</div>
+    <div class="mobile-row"><b>Fotos:</b><br>${fotosHtml || "<span class='small'>Keine Fotos</span>"}</div>
+    <div class="mobile-actions no-print">
+     <button onclick="bearbeiten('${e.id}')">Bearbeiten</button>
+     <button class="danger" onclick="loeschen('${e.id}')">Löschen</button>
+    </div>`;
+   mobileListe.appendChild(card);
+  }
  });
 
  dashboard();

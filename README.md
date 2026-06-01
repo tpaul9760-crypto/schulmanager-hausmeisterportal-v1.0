@@ -1,17 +1,15 @@
-# SchulManager Hausmeisterportal v1.1
+# SchulManager Hausmeisterportal v1.2 Mobile
 
-Neue Version mit Firebase und Fotos.
+Mobile optimierte Version.
 
 ## Neu
-- Mehrere Fotos pro Meldung
-- Fotoaufnahme am Handy
-- automatische Bildverkleinerung
-- Vorschau vor dem Speichern
-- Fotos in der Meldungsübersicht
-- Großansicht mit Vor/Zurück
-- Export inkl. Fotos
-- Import inkl. Fotos
+- Handy-Kartenansicht statt breiter Tabelle
+- größere Buttons
+- größere Eingabefelder
+- bessere Bedienung auf Android
+- Login bleibt erhalten
+- Fotos, Firebase, Export/Import bleiben erhalten
 
-## Hinweis
-Die Fotos werden direkt mit der Meldung in Firebase gespeichert. Dadurch wird kein Firebase Storage benötigt.
-Für sehr viele oder sehr große Fotos sollte später Firebase Storage oder eine Schul-Cloud genutzt werden.
+## Login
+Benutzername: GSR-Hausmeister
+Passwort: GSR2026
