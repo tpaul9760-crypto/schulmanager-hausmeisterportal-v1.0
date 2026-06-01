@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>SchulManager – Hausmeisterportal Cloud</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1f3b57">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<style>
+body { font-family: Arial, sans-serif; margin:0; background:#f2f4f7; color:#222; }
+header { background:#1f3b57; color:white; padding:18px; text-align:center; }
+main { max-width:1300px; margin:auto; padding:20px; }
+.card { background:white; padding:18px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.12); margin-bottom:20px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
+.stat { background:#e8edf3; padding:14px; border-radius:8px; text-align:center; font-weight:bold; }
+.stat span { display:block; font-size:28px; margin-top:6px; color:#1f3b57; }
+label { font-weight:bold; display:block; margin-top:12px; }
+input, textarea, select { width:100%; padding:9px; margin-top:5px; box-sizing:border-box; border:1px solid #aaa; border-radius:6px; font-size:14px; }
+textarea { min-height:80px; }
+button { background:#1f3b57; color:white; border:none; padding:10px 14px; border-radius:6px; cursor:pointer; margin:6px 4px 6px 0; font-size:14px; }
+button:hover { background:#315b83; }
+.success { background:#237a3b; }
+.danger { background:#a82626; }
+.warning { background:#b36b00; }
+.hidden { display:none; }
+.toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+table { width:100%; border-collapse:collapse; background:white; margin-top:12px; font-size:13px; }
+th, td { border:1px solid #ccc; padding:8px; vertical-align:top; }
+th { background:#e8edf3; }
+.small { font-size:12px; color:#555; }
+.notice { background:#fff4cf; padding:10px; border-radius:6px; border:1px solid #d9ad35; }
+.online { color:#237a3b; font-weight:bold; }
+.offline { color:#a82626; font-weight:bold; }
+@media print {
+ header,.no-print,.card.no-print { display:none!important; }
+ body { background:white; }
+ main { max-width:none; padding:0; }
+ table { font-size:11px; }
+ button { display:none; }
+}
+</style>
+</head>
+<body>
+<header>
+<h1>SchulManager – Hausmeisterportal Cloud</h1>
+<p>Gemeinsame Meldungen für Hausmeister / Haustechnik</p>
+</header>
+
+<main>
+<section class="card">
+<h2>Dashboard</h2>
+<p>Firebase-Verbindung: <span id="cloudStatus" class="offline">wird verbunden...</span></p>
+<div class="grid">
+<div class="stat">Gesamtmeldungen <span id="statGesamt">0</span></div>
+<div class="stat">Sanitär <span id="statSanitaer">0</span></div>
+<div class="stat">Reparaturen <span id="statReparatur">0</span></div>
+<div class="stat">Reinigung <span id="statReinigung">0</span></div>
+</div>
+</section>
+
+<section class="card no-print">
+<h2 id="formularTitel">Neue Meldung erfassen</h2>
+
+<div class="notice small">
+<b>Cloud-Version Schritt 1:</b> Meldungen werden jetzt über Firebase synchronisiert. 
+Fotos folgen im nächsten Schritt über Firebase Storage.
+</div>
+
+<label>Meldungsbereich</label>
+<select id="bereichTyp">
+<option>🚻 Toiletten / Sanitär</option>
+<option>🔧 Reparatur / Technik</option>
+<option>🪑 Mobiliar / Inventar</option>
+<option>🧹 Reinigung</option>
+<option>🔑 Schlüssel / Zugang</option>
+<option>🚨 Gefahr / Sicherheit</option>
+<option>📅 Wartung / Prüfung</option>
+<option>📦 Lager / Material</option>
+<option>🌳 Außenbereich / Schulhof</option>
+<option>Sonstiges</option>
+</select>
+
+<label>Meldung / Schaden</label>
+<select id="titelAuswahl" onchange="schadenAuswahlGeaendert()"></select>
+
+<div id="sonstigesBox" class="hidden">
+<label>Sonstige Meldung / eigener Eintrag</label>
+<input type="text" id="titelSonstiges" placeholder="Eigenen Schaden oder eigene Meldung eintragen">
+</div>
+
+<label>Datum</label>
+<input type="date" id="datum">
+
+<label>Uhrzeit</label>
+<input type="time" id="uhrzeit">
+
+<label>Ort / Raum / Bereich</label>
+<input type="text" id="ort" placeholder="z. B. R107, Jungentoilette, Turnhalle, Schulhof">
+
+<label>Beschreibung</label>
+<textarea id="beschreibung" placeholder="Was wurde festgestellt?"></textarea>
+
+<label>Maßnahme / Notiz</label>
+<textarea id="massnahme" placeholder="Was wurde gemacht oder was soll erledigt werden?"></textarea>
+
+<label>Gemeldet von</label>
+<input type="text" id="gemeldetVon" placeholder="z. B. Lehrer, Reinigung, Schulleitung, Hausmeister">
+
+<label>Bearbeitet von</label>
+<input type="text" id="bearbeitetVon" placeholder="z. B. Thomas, Kollege, Fachfirma">
+
+<button id="speicherButton" class="success" onclick="speichern()">Meldung speichern</button>
+<button id="abbrechenButton" class="warning hidden" onclick="bearbeitenAbbrechen()">Bearbeiten abbrechen</button>
+<button onclick="formularLeeren()">Formular leeren</button>
+</section>
+
+<section class="card no-print">
+<h2>Suche / Filter / Ausgabe</h2>
+<div class="toolbar">
+<input style="max-width:260px" type="text" id="suche" placeholder="Suche..." oninput="anzeigen()">
+<select style="max-width:220px" id="filterBereich" onchange="anzeigen()">
+<option>Alle Bereiche</option>
+<option>🚻 Toiletten / Sanitär</option>
+<option>🔧 Reparatur / Technik</option>
+<option>🪑 Mobiliar / Inventar</option>
+<option>🧹 Reinigung</option>
+<option>🔑 Schlüssel / Zugang</option>
+<option>🚨 Gefahr / Sicherheit</option>
+<option>📅 Wartung / Prüfung</option>
+<option>📦 Lager / Material</option>
+<option>🌳 Außenbereich / Schulhof</option>
+<option>Sonstiges</option>
+</select>
+<button onclick="window.print()">Drucken / PDF</button>
+<button onclick="exportJSON()">Sicherung exportieren</button>
+</div>
+</section>
+
+<section class="card">
+<h2>Meldungsübersicht</h2>
+<p id="anzahl"></p>
+<table>
+<thead>
+<tr>
+<th>Nr.</th><th>Datum</th><th>Bereich</th><th>Ort</th><th>Meldung</th><th>Maßnahme / Notiz</th><th>Personen</th><th class="no-print">Aktion</th>
+</tr>
+</thead>
+<tbody id="liste"></tbody>
+</table>
+</section>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const firebaseConfig = {
+  "apiKey": "AIzaSyAUjkgBQ0H5efnzve0YCSmph8mKEqbCNzk",
+  "authDomain": "schulmanager-hausmeisterportal.firebaseapp.com",
+  "projectId": "schulmanager-hausmeisterportal",
+  "storageBucket": "schulmanager-hausmeisterportal.firebasestorage.app",
+  "messagingSenderId": "440398726921",
+  "appId": "1:440398726921:web:953381c1a18b22ac92b5d8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const meldungenRef = collection(db, "meldungen");
+
+let eintraege = [];
+let bearbeitungsId = null;
+
+const schadenVorlagen = {
+ "🚻 Toiletten / Sanitär": [
+  "Urinal verstopft", "WC verstopft", "Überschwemmung", "Siphon beschädigt",
+  "Toilettensitz beschädigt", "Spülung defekt", "Waschbecken verstopft",
+  "Wasserhahn defekt", "Seifenspender leer/defekt", "Papier fehlt", "Vandalismus", "Sonstiges"
+ ],
+ "🔧 Reparatur / Technik": [
+  "Lampe defekt", "Steckdose defekt", "Heizung defekt", "Fenster beschädigt",
+  "Tür beschädigt", "Schließanlage defekt", "Netzwerk / WLAN", "Beamer / Technik",
+  "Wasserschaden", "Sonstiges"
+ ],
+ "🪑 Mobiliar / Inventar": [
+  "Tisch beschädigt", "Stuhl beschädigt", "Schrank beschädigt", "Whiteboard / Tafel beschädigt",
+  "Regal beschädigt", "Inventar fehlt", "Sonstiges"
+ ],
+ "🧹 Reinigung": [
+  "Sonderreinigung erforderlich", "Graffiti", "Starke Verschmutzung", "Müllproblem",
+  "Geruchsbelästigung", "Flüssigkeit ausgelaufen", "Sonstiges"
+ ],
+ "🔑 Schlüssel / Zugang": [
+  "Schlüsselverlust", "Neuer Schlüssel benötigt", "Schließzylinder defekt",
+  "Tür öffnet nicht", "Zugang ändern", "Sonstiges"
+ ],
+ "🚨 Gefahr / Sicherheit": [
+  "Unfallgefahr", "Glasschaden", "Stolperfalle", "Brandschutzproblem",
+  "Fluchtweg blockiert", "Elektrische Gefahr", "Sonstiges"
+ ],
+ "📅 Wartung / Prüfung": [
+  "Regelprüfung fällig", "Wartung erledigt", "Wartung offen", "Fachfirma erforderlich",
+  "Prüfplakette fehlt", "Sonstiges"
+ ],
+ "📦 Lager / Material": [
+  "Toilettenpapier nachfüllen", "Seife nachfüllen", "Papierhandtücher nachfüllen",
+  "Reinigungsmittel fehlt", "Ersatzteil benötigt", "Material bestellen", "Sonstiges"
+ ],
+ "🌳 Außenbereich / Schulhof": [
+  "Müll auf dem Schulhof", "Beschädigung außen", "Zaun / Tor defekt", "Gefahrenstelle",
+  "Grünpflege erforderlich", "Spielgerät beschädigt", "Sonstiges"
+ ],
+ "Sonstiges": ["Allgemeine Meldung", "Rückruf erforderlich", "Sonstiges"]
+};
+
+function heuteSetzen() {
+ const now = new Date();
+ document.getElementById("datum").value = now.toISOString().slice(0,10);
+ document.getElementById("uhrzeit").value = now.toTimeString().slice(0,5);
+}
+
+function schadenAuswahlAktualisieren(vorauswahl = "") {
+ const bereich = document.getElementById("bereichTyp").value;
+ const select = document.getElementById("titelAuswahl");
+ const werte = schadenVorlagen[bereich] || schadenVorlagen["Sonstiges"];
+
+ select.innerHTML = "";
+ werte.forEach(wert => {
+  const option = document.createElement("option");
+  option.value = wert;
+  option.textContent = wert;
+  select.appendChild(option);
+ });
+
+ if (vorauswahl && werte.includes(vorauswahl)) {
+  select.value = vorauswahl;
+  document.getElementById("titelSonstiges").value = "";
+ } else if (vorauswahl) {
+  select.value = "Sonstiges";
+  document.getElementById("titelSonstiges").value = vorauswahl;
+ } else {
+  document.getElementById("titelSonstiges").value = "";
+ }
+
+ schadenAuswahlGeaendert();
+}
+
+function schadenAuswahlGeaendert() {
+ const istSonstiges = document.getElementById("titelAuswahl").value === "Sonstiges";
+ document.getElementById("sonstigesBox").classList.toggle("hidden", !istSonstiges);
+}
+
+function aktuellerTitel() {
+ const auswahl = document.getElementById("titelAuswahl").value;
+ if (auswahl === "Sonstiges") {
+  return document.getElementById("titelSonstiges").value.trim();
+ }
+ return auswahl;
+}
+
+window.speichern = async function() {
+ const eintrag = {
+  bereichTyp: document.getElementById("bereichTyp").value,
+  datum: document.getElementById("datum").value,
+  uhrzeit: document.getElementById("uhrzeit").value,
+  ort: document.getElementById("ort").value.trim(),
+  titel: aktuellerTitel(),
+  beschreibung: document.getElementById("beschreibung").value.trim(),
+  massnahme: document.getElementById("massnahme").value.trim(),
+  gemeldetVon: document.getElementById("gemeldetVon").value.trim(),
+  bearbeitetVon: document.getElementById("bearbeitetVon").value.trim(),
+  zuletztGeaendert: new Date().toLocaleString("de-DE")
+ };
+
+ if (!eintrag.datum || !eintrag.ort || !eintrag.titel) {
+  alert("Bitte mindestens Datum, Ort und Meldung ausfüllen.");
+  return;
+ }
+
+ try {
+  if (bearbeitungsId) {
+   await updateDoc(doc(db, "meldungen", bearbeitungsId), eintrag);
+   alert("Meldung geändert.");
+  } else {
+   await addDoc(meldungenRef, {
+    ...eintrag,
+    erstelltAm: serverTimestamp()
+   });
+   alert("Meldung gespeichert.");
+  }
+  formularLeeren();
+ } catch (error) {
+  console.error(error);
+  alert("Fehler beim Speichern. Prüfe bitte die Firebase-Regeln.");
+ }
+};
+
+window.bearbeiten = function(id) {
+ const e = eintraege.find(x => x.id === id);
+ if (!e) return;
+
+ bearbeitungsId = id;
+ document.getElementById("bereichTyp").value = e.bereichTyp || "Sonstiges";
+ schadenAuswahlAktualisieren(e.titel || "");
+
+ ["datum","uhrzeit","ort","beschreibung","massnahme","gemeldetVon","bearbeitetVon"].forEach(k => {
+  document.getElementById(k).value = e[k] || "";
+ });
+
+ document.getElementById("speicherButton").textContent = "Änderungen speichern";
+ document.getElementById("abbrechenButton").classList.remove("hidden");
+ document.getElementById("formularTitel").textContent = "Meldung bearbeiten";
+ window.scrollTo({top:0,behavior:"smooth"});
+};
+
+window.bearbeitenAbbrechen = function() {
+ formularLeeren();
+};
+
+window.loeschen = async function(id) {
+ if (!confirm("Diese Meldung wirklich löschen?")) return;
+ try {
+  await deleteDoc(doc(db, "meldungen", id));
+ } catch (error) {
+  console.error(error);
+  alert("Fehler beim Löschen.");
+ }
+};
+
+function formularLeeren() {
+ ["ort","beschreibung","massnahme","gemeldetVon","bearbeitetVon","titelSonstiges"].forEach(id => {
+  document.getElementById(id).value = "";
+ });
+ bearbeitungsId = null;
+ document.getElementById("speicherButton").textContent = "Meldung speichern";
+ document.getElementById("abbrechenButton").classList.add("hidden");
+ document.getElementById("formularTitel").textContent = "Neue Meldung erfassen";
+ heuteSetzen();
+ schadenAuswahlAktualisieren();
+}
+
+window.anzeigen = function() {
+ const suche = document.getElementById("suche").value.toLowerCase();
+ const fb = document.getElementById("filterBereich").value;
+
+ let liste = [...eintraege];
+ if (fb !== "Alle Bereiche") liste = liste.filter(e => e.bereichTyp === fb);
+ if (suche) liste = liste.filter(e => JSON.stringify(e).toLowerCase().includes(suche));
+
+ document.getElementById("anzahl").textContent = "Anzahl Meldungen: " + liste.length;
+ const tbody = document.getElementById("liste");
+ tbody.innerHTML = "";
+
+ liste.forEach((e, index) => {
+  const nummer = "M-" + String(liste.length - index).padStart(4, "0");
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+   <td>${nummer}</td>
+   <td>${escapeHtml(e.datum || "")}<br>${escapeHtml(e.uhrzeit || "")}</td>
+   <td>${escapeHtml(e.bereichTyp || "")}</td>
+   <td>${escapeHtml(e.ort || "")}</td>
+   <td><b>${escapeHtml(e.titel || "")}</b><br>${escapeHtml(e.beschreibung || "")}</td>
+   <td>${escapeHtml(e.massnahme || "")}<br>${e.zuletztGeaendert ? "<b>Geändert:</b> " + escapeHtml(e.zuletztGeaendert) : ""}</td>
+   <td><b>Gemeldet:</b> ${escapeHtml(e.gemeldetVon || "")}<br><b>Bearbeitet:</b> ${escapeHtml(e.bearbeitetVon || "")}</td>
+   <td class="no-print">
+    <button onclick="bearbeiten('${e.id}')">Bearbeiten</button>
+    <button class="danger" onclick="loeschen('${e.id}')">Löschen</button>
+   </td>`;
+  tbody.appendChild(tr);
+ });
+
+ dashboard();
+};
+
+function dashboard() {
+ document.getElementById("statGesamt").textContent = eintraege.length;
+ document.getElementById("statSanitaer").textContent = eintraege.filter(x => (x.bereichTyp || "").includes("Sanitär")).length;
+ document.getElementById("statReparatur").textContent = eintraege.filter(x => (x.bereichTyp || "").includes("Reparatur")).length;
+ document.getElementById("statReinigung").textContent = eintraege.filter(x => (x.bereichTyp || "").includes("Reinigung")).length;
+}
+
+window.exportJSON = function() {
+ const daten = JSON.stringify(eintraege, null, 2);
+ const blob = new Blob([daten], {type:"application/json"});
+ const url = URL.createObjectURL(blob);
+ const a = document.createElement("a");
+ a.href = url;
+ a.download = "schulmanager_firebase_sicherung.json";
+ a.click();
+ URL.revokeObjectURL(url);
+};
+
+function escapeHtml(text) {
+ return String(text)
+  .replaceAll("&","&amp;")
+  .replaceAll("<","&lt;")
+  .replaceAll(">","&gt;")
+  .replaceAll('"',"&quot;")
+  .replaceAll("'","&#039;");
+}
+
+document.getElementById("bereichTyp").addEventListener("change", () => schadenAuswahlAktualisieren());
+
+heuteSetzen();
+schadenAuswahlAktualisieren();
+
+const q = query(meldungenRef, orderBy("erstelltAm", "desc"));
+onSnapshot(q, (snapshot) => {
+ eintraege = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+ document.getElementById("cloudStatus").textContent = "verbunden";
+ document.getElementById("cloudStatus").className = "online";
+ anzeigen();
+}, (error) => {
+ console.error(error);
+ document.getElementById("cloudStatus").textContent = "Fehler";
+ document.getElementById("cloudStatus").className = "offline";
+ alert("Firebase-Verbindung fehlgeschlagen. Bitte Firestore-Regeln prüfen.");
+});
+</script>
+</body>
+</html>
