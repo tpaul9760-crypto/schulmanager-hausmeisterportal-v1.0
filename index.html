@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal Cloud</title>
+<title>SchulManager – Hausmeisterportal Cloud v1.1</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -32,6 +32,20 @@ th { background:#e8edf3; }
 .notice { background:#fff4cf; padding:10px; border-radius:6px; border:1px solid #d9ad35; }
 .online { color:#237a3b; font-weight:bold; }
 .offline { color:#a82626; font-weight:bold; }
+
+.drop-zone { border:2px dashed #7f8fa6; border-radius:8px; padding:16px; text-align:center; background:#f8fafc; margin-top:8px; cursor:pointer; }
+.drop-zone.dragover { background:#e8f0fb; border-color:#1f3b57; }
+.photo-preview img, .entry-photo { max-width:90px; max-height:90px; margin:4px; border:1px solid #999; border-radius:4px; object-fit:cover; cursor:pointer; }
+.photo-wrapper { display:inline-block; position:relative; margin:5px; }
+.remove-photo { position:absolute; top:-7px; right:-7px; background:#a82626; color:white; border:none; border-radius:50%; width:22px; height:22px; padding:0; font-size:14px; line-height:20px; }
+.photo-count { font-size:13px; color:#333; margin-top:6px; font-weight:bold; }
+.photo-modal { display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,.88); align-items:center; justify-content:center; flex-direction:column; }
+.photo-modal img { max-width:92%; max-height:82%; border:3px solid white; border-radius:6px; background:white; }
+.modal-close { position:absolute; top:15px; right:25px; color:white; font-size:38px; font-weight:bold; cursor:pointer; }
+.modal-controls { margin-top:15px; text-align:center; }
+.modal-controls button { background:white; color:#1f3b57; font-weight:bold; margin:0 10px; }
+.modal-counter { color:white; margin-top:10px; font-size:14px; }
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -43,8 +57,8 @@ th { background:#e8edf3; }
 </head>
 <body>
 <header>
-<h1>SchulManager – Hausmeisterportal Cloud</h1>
-<p>Gemeinsame Meldungen für Hausmeister / Haustechnik</p>
+<h1>SchulManager – Hausmeisterportal Cloud v1.1</h1>
+<p>Gemeinsame Meldungen mit Fotodokumentation</p>
 </header>
 
 <main>
@@ -63,8 +77,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version Schritt 1:</b> Meldungen werden jetzt über Firebase synchronisiert. 
-Fotos folgen im nächsten Schritt über Firebase Storage.
+<b>Cloud-Version v1.1:</b> Meldungen werden über Firebase synchronisiert. Fotos werden automatisch verkleinert und direkt in der Meldung gespeichert.
 </div>
 
 <label>Meldungsbereich</label>
@@ -110,6 +123,15 @@ Fotos folgen im nächsten Schritt über Firebase Storage.
 <label>Bearbeitet von</label>
 <input type="text" id="bearbeitetVon" placeholder="z. B. Thomas, Kollege, Fachfirma">
 
+
+<label>Fotos beifügen</label>
+<div id="dropZone" class="drop-zone" onclick="document.getElementById('fotos').click()">Fotos hier hineinziehen oder klicken zum Auswählen</div>
+<input class="hidden" type="file" id="fotos" accept="image/*" capture="environment" multiple>
+<div id="fotoAnzahl" class="photo-count">Keine Fotos ausgewählt</div>
+<div id="fotoVorschau" class="photo-preview"></div>
+<p class="small">Fotos werden beim Speichern automatisch verkleinert. So bleibt Firebase ohne Storage nutzbar.</p>
+
+
 <button id="speicherButton" class="success" onclick="speichern()">Meldung speichern</button>
 <button id="abbrechenButton" class="warning hidden" onclick="bearbeitenAbbrechen()">Bearbeiten abbrechen</button>
 <button onclick="formularLeeren()">Formular leeren</button>
@@ -133,7 +155,8 @@ Fotos folgen im nächsten Schritt über Firebase Storage.
 <option>Sonstiges</option>
 </select>
 <button onclick="window.print()">Drucken / PDF</button>
-<button onclick="exportJSON()">Sicherung exportieren</button>
+<button onclick="exportJSON()">Sicherung exportieren inkl. Fotos</button>
+<label style="display:inline;font-weight:normal;"><input class="hidden" type="file" id="importDatei" accept=".json" onchange="importJSON(event)"><button onclick="document.getElementById('importDatei').click()">Sicherung importieren inkl. Fotos</button></label>
 </div>
 </section>
 
@@ -143,12 +166,23 @@ Fotos folgen im nächsten Schritt über Firebase Storage.
 <table>
 <thead>
 <tr>
-<th>Nr.</th><th>Datum</th><th>Bereich</th><th>Ort</th><th>Meldung</th><th>Maßnahme / Notiz</th><th>Personen</th><th class="no-print">Aktion</th>
+<th>Nr.</th><th>Datum</th><th>Bereich</th><th>Ort</th><th>Meldung</th><th>Maßnahme / Notiz</th><th>Personen</th><th>Fotos</th><th class="no-print">Aktion</th>
 </tr>
 </thead>
 <tbody id="liste"></tbody>
 </table>
 </section>
+
+<div id="photoModal" class="photo-modal no-print" onclick="modalHintergrundSchliessen(event)">
+<span class="modal-close" onclick="fotoSchliessen()">&times;</span>
+<img id="modalImage" src="" alt="Großansicht">
+<div class="modal-controls">
+<button onclick="event.stopPropagation(); fotoZurueck();">← Zurück</button>
+<button onclick="event.stopPropagation(); fotoWeiter();">Weiter →</button>
+</div>
+<div id="modalCounter" class="modal-counter"></div>
+</div>
+
 </main>
 
 <script type="module">
@@ -180,7 +214,10 @@ const db = getFirestore(app);
 const meldungenRef = collection(db, "meldungen");
 
 let eintraege = [];
+let fotosAktuell = [];
 let bearbeitungsId = null;
+let aktuelleGalerie = [];
+let aktuellesFotoIndex = 0;
 
 const schadenVorlagen = {
  "🚻 Toiletten / Sanitär": [
@@ -269,6 +306,126 @@ function aktuellerTitel() {
  return auswahl;
 }
 
+
+document.getElementById("fotos").addEventListener("change", async function(event) {
+ await fotosHinzufuegen(Array.from(event.target.files));
+ document.getElementById("fotos").value = "";
+});
+
+const dropZone = document.getElementById("dropZone");
+
+dropZone.addEventListener("dragover", function(event) {
+ event.preventDefault();
+ dropZone.classList.add("dragover");
+});
+
+dropZone.addEventListener("dragleave", function() {
+ dropZone.classList.remove("dragover");
+});
+
+dropZone.addEventListener("drop", async function(event) {
+ event.preventDefault();
+ dropZone.classList.remove("dragover");
+ await fotosHinzufuegen(Array.from(event.dataTransfer.files));
+});
+
+async function fotosHinzufuegen(files) {
+ const bilder = files.filter(file => file.type.startsWith("image/"));
+
+ if (bilder.length === 0 && files.length > 0) {
+  alert("Bitte nur Bilddateien auswählen.");
+  return;
+ }
+
+ for (const file of bilder) {
+  try {
+   const verkleinert = await bildVerkleinern(file, 1200, 0.72);
+   fotosAktuell.push(verkleinert);
+  } catch (error) {
+   console.error(error);
+   alert("Ein Foto konnte nicht verarbeitet werden.");
+  }
+ }
+
+ fotoVorschauAktualisieren();
+}
+
+function bildVerkleinern(file, maxSize, quality) {
+ return new Promise((resolve, reject) => {
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+   const img = new Image();
+
+   img.onload = function() {
+    let width = img.width;
+    let height = img.height;
+
+    if (width > height && width > maxSize) {
+     height = Math.round(height * maxSize / width);
+     width = maxSize;
+    } else if (height > maxSize) {
+     width = Math.round(width * maxSize / height);
+     height = maxSize;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, width, height);
+
+    resolve(canvas.toDataURL("image/jpeg", quality));
+   };
+
+   img.onerror = reject;
+   img.src = e.target.result;
+  };
+
+  reader.onerror = reject;
+  reader.readAsDataURL(file);
+ });
+}
+
+function fotoVorschauAktualisieren() {
+ const vorschau = document.getElementById("fotoVorschau");
+ vorschau.innerHTML = "";
+
+ fotosAktuell.forEach((src, index) => {
+  const wrapper = document.createElement("div");
+  wrapper.className = "photo-wrapper";
+
+  const img = document.createElement("img");
+  img.src = src;
+  img.title = "Foto groß anzeigen";
+  img.onclick = function() {
+   aktuelleGalerie = fotosAktuell;
+   aktuellesFotoIndex = index;
+   aktualisiereGrossansicht();
+   document.getElementById("photoModal").style.display = "flex";
+  };
+
+  const remove = document.createElement("button");
+  remove.className = "remove-photo";
+  remove.innerHTML = "×";
+  remove.title = "Foto entfernen";
+  remove.onclick = function(event) {
+   event.stopPropagation();
+   fotosAktuell.splice(index, 1);
+   fotoVorschauAktualisieren();
+  };
+
+  wrapper.appendChild(img);
+  wrapper.appendChild(remove);
+  vorschau.appendChild(wrapper);
+ });
+
+ document.getElementById("fotoAnzahl").textContent =
+  fotosAktuell.length === 0 ? "Keine Fotos ausgewählt" : fotosAktuell.length + " Foto(s) ausgewählt";
+}
+
+
 window.speichern = async function() {
  const eintrag = {
   bereichTyp: document.getElementById("bereichTyp").value,
@@ -280,6 +437,7 @@ window.speichern = async function() {
   massnahme: document.getElementById("massnahme").value.trim(),
   gemeldetVon: document.getElementById("gemeldetVon").value.trim(),
   bearbeitetVon: document.getElementById("bearbeitetVon").value.trim(),
+  fotos: fotosAktuell,
   zuletztGeaendert: new Date().toLocaleString("de-DE")
  };
 
@@ -318,6 +476,9 @@ window.bearbeiten = function(id) {
   document.getElementById(k).value = e[k] || "";
  });
 
+ fotosAktuell = e.fotos || [];
+ fotoVorschauAktualisieren();
+
  document.getElementById("speicherButton").textContent = "Änderungen speichern";
  document.getElementById("abbrechenButton").classList.remove("hidden");
  document.getElementById("formularTitel").textContent = "Meldung bearbeiten";
@@ -342,6 +503,8 @@ function formularLeeren() {
  ["ort","beschreibung","massnahme","gemeldetVon","bearbeitetVon","titelSonstiges"].forEach(id => {
   document.getElementById(id).value = "";
  });
+ fotosAktuell = [];
+ fotoVorschauAktualisieren();
  bearbeitungsId = null;
  document.getElementById("speicherButton").textContent = "Meldung speichern";
  document.getElementById("abbrechenButton").classList.add("hidden");
@@ -364,6 +527,7 @@ window.anzeigen = function() {
 
  liste.forEach((e, index) => {
   const nummer = "M-" + String(liste.length - index).padStart(4, "0");
+  const fotosHtml = (e.fotos || []).map((src, fotoIndex) => `<img class="entry-photo" src="${src}" onclick="fotoGrossAnzeigen(\'${e.id}\', ${fotoIndex})" title="Foto groß anzeigen">`).join("");
   const tr = document.createElement("tr");
   tr.innerHTML = `
    <td>${nummer}</td>
@@ -373,6 +537,7 @@ window.anzeigen = function() {
    <td><b>${escapeHtml(e.titel || "")}</b><br>${escapeHtml(e.beschreibung || "")}</td>
    <td>${escapeHtml(e.massnahme || "")}<br>${e.zuletztGeaendert ? "<b>Geändert:</b> " + escapeHtml(e.zuletztGeaendert) : ""}</td>
    <td><b>Gemeldet:</b> ${escapeHtml(e.gemeldetVon || "")}<br><b>Bearbeitet:</b> ${escapeHtml(e.bearbeitetVon || "")}</td>
+   <td>${fotosHtml}</td>
    <td class="no-print">
     <button onclick="bearbeiten('${e.id}')">Bearbeiten</button>
     <button class="danger" onclick="loeschen('${e.id}')">Löschen</button>
@@ -391,15 +556,111 @@ function dashboard() {
 }
 
 window.exportJSON = function() {
- const daten = JSON.stringify(eintraege, null, 2);
+ const daten = JSON.stringify({
+  version: "schulmanager-v1.1-fotos",
+  erstelltAm: new Date().toISOString(),
+  meldungen: eintraege
+ }, null, 2);
+
  const blob = new Blob([daten], {type:"application/json"});
  const url = URL.createObjectURL(blob);
  const a = document.createElement("a");
  a.href = url;
- a.download = "schulmanager_firebase_sicherung.json";
+ a.download = "schulmanager_sicherung_mit_fotos.json";
  a.click();
  URL.revokeObjectURL(url);
 };
+
+window.importJSON = async function(event) {
+ const file = event.target.files[0];
+ if (!file) return;
+
+ const reader = new FileReader();
+
+ reader.onload = async function(e) {
+  try {
+   const daten = JSON.parse(e.target.result);
+   const meldungen = Array.isArray(daten) ? daten : daten.meldungen;
+
+   if (!Array.isArray(meldungen)) {
+    throw new Error("Keine Meldungsliste gefunden");
+   }
+
+   if (!confirm("Import starten? Vorhandene Firebase-Meldungen werden nicht gelöscht. Importierte Meldungen werden zusätzlich angelegt.")) {
+    return;
+   }
+
+   for (const meldung of meldungen) {
+    const kopie = {...meldung};
+    delete kopie.id;
+    kopie.importiertAm = new Date().toLocaleString("de-DE");
+    kopie.erstelltAm = serverTimestamp();
+    await addDoc(meldungenRef, kopie);
+   }
+
+   alert("Import abgeschlossen.");
+  } catch (error) {
+   console.error(error);
+   alert("Die Sicherung konnte nicht importiert werden.");
+  }
+ };
+
+ reader.readAsText(file);
+ event.target.value = "";
+};
+
+window.fotoGrossAnzeigen = function(id, fotoIndex) {
+ const eintrag = eintraege.find(e => e.id === id);
+ if (!eintrag || !eintrag.fotos || eintrag.fotos.length === 0) return;
+
+ aktuelleGalerie = eintrag.fotos;
+ aktuellesFotoIndex = fotoIndex;
+
+ aktualisiereGrossansicht();
+ document.getElementById("photoModal").style.display = "flex";
+};
+
+function aktualisiereGrossansicht() {
+ if (!aktuelleGalerie.length) return;
+
+ document.getElementById("modalImage").src = aktuelleGalerie[aktuellesFotoIndex];
+ document.getElementById("modalCounter").textContent =
+  "Foto " + (aktuellesFotoIndex + 1) + " von " + aktuelleGalerie.length;
+}
+
+window.fotoWeiter = function() {
+ if (!aktuelleGalerie.length) return;
+ aktuellesFotoIndex = (aktuellesFotoIndex + 1) % aktuelleGalerie.length;
+ aktualisiereGrossansicht();
+};
+
+window.fotoZurueck = function() {
+ if (!aktuelleGalerie.length) return;
+ aktuellesFotoIndex = (aktuellesFotoIndex - 1 + aktuelleGalerie.length) % aktuelleGalerie.length;
+ aktualisiereGrossansicht();
+};
+
+window.fotoSchliessen = function() {
+ document.getElementById("photoModal").style.display = "none";
+ document.getElementById("modalImage").src = "";
+ aktuelleGalerie = [];
+ aktuellesFotoIndex = 0;
+};
+
+window.modalHintergrundSchliessen = function(event) {
+ if (event.target.id === "photoModal") {
+  fotoSchliessen();
+ }
+};
+
+document.addEventListener("keydown", function(event) {
+ const modalOffen = document.getElementById("photoModal").style.display === "flex";
+ if (!modalOffen) return;
+
+ if (event.key === "Escape") fotoSchliessen();
+ if (event.key === "ArrowRight") fotoWeiter();
+ if (event.key === "ArrowLeft") fotoZurueck();
+});
 
 function escapeHtml(text) {
  return String(text)
@@ -414,6 +675,7 @@ document.getElementById("bereichTyp").addEventListener("change", () => schadenAu
 
 heuteSetzen();
 schadenAuswahlAktualisieren();
+fotoVorschauAktualisieren();
 
 const q = query(meldungenRef, orderBy("erstelltAm", "desc"));
 onSnapshot(q, (snapshot) => {

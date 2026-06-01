@@ -1,20 +1,17 @@
-# SchulManager Firebase Cloud – Schritt 1
+# SchulManager Hausmeisterportal v1.1
 
-Diese Version speichert Meldungen nicht mehr lokal im Browser, sondern in Firebase Cloud Firestore.
+Neue Version mit Firebase und Fotos.
 
-## Enthalten
+## Neu
+- Mehrere Fotos pro Meldung
+- Fotoaufnahme am Handy
+- automatische Bildverkleinerung
+- Vorschau vor dem Speichern
+- Fotos in der Meldungsübersicht
+- Großansicht mit Vor/Zurück
+- Export inkl. Fotos
+- Import inkl. Fotos
 
-- Gemeinsame Meldungen für mehrere Geräte
-- Live-Synchronisierung
-- Bearbeiten
-- Löschen
-- Suche
-- Bereichsfilter
-- Export als JSON
-- PWA-Dateien für GitHub Pages
-
-## Noch nicht enthalten
-
-- Gemeinsame Fotos über Firebase Storage
-
-Fotos werden im nächsten Schritt angebunden.
+## Hinweis
+Die Fotos werden direkt mit der Meldung in Firebase gespeichert. Dadurch wird kein Firebase Storage benötigt.
+Für sehr viele oder sehr große Fotos sollte später Firebase Storage oder eine Schul-Cloud genutzt werden.
