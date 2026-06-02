@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal Mobile v1.2</title>
+<title>SchulManager – Hausmeisterportal v1.3 Foto-Manager</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -133,6 +133,26 @@ th { background:#e8edf3; }
  .notice { font-size: 14px; }
 }
 
+
+.photo-actions {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+ gap: 8px;
+ margin-top: 8px;
+}
+.photo-actions button {
+ margin: 0;
+}
+@media (max-width: 760px) {
+ .photo-actions {
+  display: block;
+ }
+ .photo-actions button {
+  width: 100%;
+  margin-bottom: 8px;
+ }
+}
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -167,8 +187,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal Mobile v1.2</h1>
-<p>Mobile optimierte Meldungen mit Fotodokumentation</p>
+<h1>SchulManager – Hausmeisterportal v1.3 Foto-Manager</h1>
+<p>Fotoaufnahme, Galerie, Dateien und Drag & Drop</p>
 </header>
 
 <main>
@@ -187,7 +207,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.1:</b> Meldungen werden über Firebase synchronisiert. Fotos werden automatisch verkleinert und direkt in der Meldung gespeichert.
+<b>Cloud-Version v1.3:</b> Meldungen werden über Firebase synchronisiert. Fotos können per Kamera, Galerie, Dateien oder Drag & Drop hinzugefügt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -235,11 +255,22 @@ th { background:#e8edf3; }
 
 
 <label>Fotos beifügen</label>
-<div id="dropZone" class="drop-zone" onclick="document.getElementById('fotos').click()">Fotos hier hineinziehen oder klicken zum Auswählen</div>
-<input class="hidden" type="file" id="fotos" accept="image/*" capture="environment" multiple>
+
+<div class="photo-actions">
+ <button type="button" onclick="document.getElementById('kameraInput').click()">📷 Foto aufnehmen</button>
+ <button type="button" onclick="document.getElementById('galerieInput').click()">🖼 Bild aus Galerie auswählen</button>
+ <button type="button" onclick="document.getElementById('dateiInput').click()">📁 Bild aus Dateien auswählen</button>
+</div>
+
+<div id="dropZone" class="drop-zone">🖱️ Bilder hier hineinziehen oder klicken zum Auswählen</div>
+
+<input class="hidden" type="file" id="kameraInput" accept="image/*" capture="environment">
+<input class="hidden" type="file" id="galerieInput" accept="image/*" multiple>
+<input class="hidden" type="file" id="dateiInput" accept="image/*" multiple>
+
 <div id="fotoAnzahl" class="photo-count">Keine Fotos ausgewählt</div>
 <div id="fotoVorschau" class="photo-preview"></div>
-<p class="small">Fotos werden beim Speichern automatisch verkleinert. So bleibt Firebase ohne Storage nutzbar.</p>
+<p class="small">Du kannst Fotos aufnehmen, Bilder aus der Galerie/Dateien auswählen oder Bilder am PC per Drag & Drop hineinziehen.</p>
 
 
 <button id="speicherButton" class="success" onclick="speichern()">Meldung speichern</button>
@@ -460,12 +491,19 @@ function aktuellerTitel() {
 }
 
 
-document.getElementById("fotos").addEventListener("change", async function(event) {
- await fotosHinzufuegen(Array.from(event.target.files));
- document.getElementById("fotos").value = "";
+["kameraInput", "galerieInput", "dateiInput"].forEach(inputId => {
+ const input = document.getElementById(inputId);
+ input.addEventListener("change", async function(event) {
+  await fotosHinzufuegen(Array.from(event.target.files));
+  input.value = "";
+ });
 });
 
 const dropZone = document.getElementById("dropZone");
+
+dropZone.addEventListener("click", function() {
+ document.getElementById("dateiInput").click();
+});
 
 dropZone.addEventListener("dragover", function(event) {
  event.preventDefault();
@@ -733,7 +771,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.1-fotos",
+  version: "schulmanager-v1.3-foto-manager",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);

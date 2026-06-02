@@ -1,16 +1,18 @@
-# SchulManager Hausmeisterportal v1.2 Mobile
+# SchulManager Hausmeisterportal v1.3 Foto-Manager
 
-Mobile optimierte Version.
-
-## Neu
-- Handy-Kartenansicht statt breiter Tabelle
-- größere Buttons
-- größere Eingabefelder
-- bessere Bedienung auf Android
+## Neu in v1.3
+- 📷 Foto aufnehmen
+- 🖼 Bild aus Galerie auswählen
+- 📁 Bild aus Dateien auswählen
+- 🖱 Drag & Drop bleibt erhalten
+- Mehrere Fotos möglich
+- Foto-Vorschau
+- Großansicht
+- Firebase bleibt erhalten
 - Login bleibt erhalten
-- Fotos, Firebase, Export/Import bleiben erhalten
+- Mobile Ansicht bleibt erhalten
+- Export/Import inkl. Fotos bleibt erhalten
 
 ## Login
-das ist eine Testversion zugang nicht möglich nur Admin 
-nutze die offline versionen .
-
+Benutzername: GSR-Hausmeister
+Passwort: GSR2026

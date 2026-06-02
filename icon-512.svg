@@ -1,7 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 192 192">
-<rect width="512" height="512" rx="35" fill="#1f3b57"/>
-<path d="M42 92 L96 48 L150 92 V154 H112 V112 H80 V154 H42 Z" fill="white"/>
-<circle cx="142" cy="50" r="18" fill="#fbbc04"/>
-<path d="M132 50h20M142 40v20" stroke="#1f3b57" stroke-width="5"/>
-<text x="96" y="179" font-family="Arial" font-size="22" font-weight="bold" text-anchor="middle" fill="white">CLOUD</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 192 192"><rect width="512" height="512" rx="35" fill="#1f3b57"/><path d="M42 92 L96 48 L150 92 V154 H112 V112 H80 V154 H42 Z" fill="white"/><circle cx="142" cy="50" r="18" fill="#fbbc04"/><path d="M132 50h20M142 40v20" stroke="#1f3b57" stroke-width="5"/><rect x="58" y="130" width="30" height="22" rx="4" fill="#d9e2ec"/><circle cx="73" cy="141" r="6" fill="#1f3b57"/><text x="96" y="179" font-family="Arial" font-size="20" font-weight="bold" text-anchor="middle" fill="white">v1.3</text></svg>
