@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.4 Update-Checker</title>
+<title>SchulManager – Hausmeisterportal v1.4.1 Update-Checker</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -179,6 +179,13 @@ th { background:#e8edf3; }
  white-space: pre-line;
 }
 
+
+.changelog summary {
+ cursor: pointer;
+ font-weight: bold;
+ color: #1f3b57;
+}
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -213,8 +220,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.4 Update-Checker</h1>
-<p>Foto-Manager mit Update-Prüfung</p>
+<h1>SchulManager – Hausmeisterportal v1.4.1 Update-Checker</h1>
+<p>Foto-Manager mit Update-Prüfung und ausklappbarem Changelog</p>
 </header>
 
 <main>
@@ -308,12 +315,15 @@ th { background:#e8edf3; }
 <section class="card no-print">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.4</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.4.1</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
  <div id="updateStatus" class="update-status"></div>
- <div id="changelogBox" class="changelog hidden"></div>
+ <details id="changelogDetails" class="changelog hidden">
+  <summary>📋 Changelog anzeigen</summary>
+  <div id="changelogBox" style="margin-top:10px;"></div>
+ </details>
 </div>
 <p class="small">Die App prüft die Datei <b>version.json</b> auf GitHub. Wenn eine neue Version vorhanden ist, kann der Cache geleert und die App neu geladen werden.</p>
 </section>
@@ -927,18 +937,19 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.4";
+const APP_VERSION = "1.4.1";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");
  const updateStatus = document.getElementById("updateStatus");
  const updateButton = document.getElementById("updateButton");
  const changelogBox = document.getElementById("changelogBox");
+ const changelogDetails = document.getElementById("changelogDetails");
 
  updateStatus.textContent = "Prüfe auf Updates...";
  updateStatus.className = "update-status";
  updateButton.classList.add("hidden");
- changelogBox.classList.add("hidden");
+ if (changelogDetails) changelogDetails.classList.add("hidden");
 
  try {
   const response = await fetch("version.json?cache=" + Date.now(), { cache: "no-store" });
@@ -959,7 +970,7 @@ window.updatePruefen = async function() {
 
    if (info.hinweis || info.changelog) {
     changelogBox.textContent = (info.hinweis ? info.hinweis + "\\n\\n" : "") + (info.changelog || "");
-    changelogBox.classList.remove("hidden");
+    if (changelogDetails) changelogDetails.classList.remove("hidden");
    }
   } else {
    updateStatus.textContent = "✅ Du nutzt die aktuelle Version.";
@@ -967,7 +978,7 @@ window.updatePruefen = async function() {
 
    if (info.changelog) {
     changelogBox.textContent = info.changelog;
-    changelogBox.classList.remove("hidden");
+    if (changelogDetails) changelogDetails.classList.remove("hidden");
    }
   }
  } catch (error) {

@@ -1,15 +1,12 @@
-# SchulManager Hausmeisterportal v1.4 Update-Checker
+# SchulManager Hausmeisterportal v1.4.1
 
-## Neu in v1.4
-- Bereich „Einstellungen / Updates“
-- Anzeige aktuelle Version
-- Anzeige verfügbare Version aus version.json
-- Button „Auf Updates prüfen“
-- Button „Jetzt aktualisieren“
-- Cache wird beim Aktualisieren gelöscht
-- Changelog-Anzeige
+## Änderung
+- Changelog wird nicht mehr offen angezeigt.
+- Changelog erscheint nur noch in einem aufklappbaren Menü.
+- Update-Checker bleibt erhalten.
 
-## Wichtig für GitHub
-Lade zusätzlich zur index.html auch die Datei version.json hoch.
-
-Wenn später eine neue Version erscheint, muss in version.json die Versionsnummer erhöht werden.
+## Wichtig
+Bitte bei GitHub alle Dateien hochladen, besonders:
+- index.html
+- version.json
+- service-worker.js
