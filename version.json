@@ -1,0 +1,5 @@
+{
+  "version": "1.4",
+  "hinweis": "SchulManager v1.4 ist verfügbar.",
+  "changelog": "v1.4\n- Update-Prüfung eingebaut\n- Anzeige aktuelle/verfügbare Version\n- Button zum Cache leeren und Aktualisieren\n\nv1.3\n- Foto aufnehmen\n- Galerie auswählen\n- Dateien auswählen\n- Drag & Drop bleibt erhalten\n\nv1.2\n- Mobile Kartenansicht\n- größere Buttons und Eingabefelder\n\nv1.1\n- Fotos und Export/Import inkl. Fotos"
+}

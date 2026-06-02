@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.3 Foto-Manager</title>
+<title>SchulManager – Hausmeisterportal v1.4 Update-Checker</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -153,6 +153,32 @@ th { background:#e8edf3; }
  }
 }
 
+
+.update-box {
+ background: #e8edf3;
+ border-radius: 8px;
+ padding: 12px;
+ margin-top: 10px;
+}
+.update-status {
+ margin-top: 8px;
+ font-weight: bold;
+}
+.update-new {
+ color: #a82626;
+}
+.update-current {
+ color: #237a3b;
+}
+.changelog {
+ background: white;
+ border: 1px solid #ccc;
+ border-radius: 6px;
+ padding: 10px;
+ margin-top: 10px;
+ white-space: pre-line;
+}
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -187,8 +213,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.3 Foto-Manager</h1>
-<p>Fotoaufnahme, Galerie, Dateien und Drag & Drop</p>
+<h1>SchulManager – Hausmeisterportal v1.4 Update-Checker</h1>
+<p>Foto-Manager mit Update-Prüfung</p>
 </header>
 
 <main>
@@ -207,7 +233,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.3:</b> Meldungen werden über Firebase synchronisiert. Fotos können per Kamera, Galerie, Dateien oder Drag & Drop hinzugefügt werden.
+<b>Cloud-Version v1.4:</b> Meldungen werden über Firebase synchronisiert. Fotos und Update-Prüfung sind integriert.
 </div>
 
 <label>Meldungsbereich</label>
@@ -276,6 +302,20 @@ th { background:#e8edf3; }
 <button id="speicherButton" class="success" onclick="speichern()">Meldung speichern</button>
 <button id="abbrechenButton" class="warning hidden" onclick="bearbeitenAbbrechen()">Bearbeiten abbrechen</button>
 <button onclick="formularLeeren()">Formular leeren</button>
+</section>
+
+
+<section class="card no-print">
+<h2>⚙️ Einstellungen / Updates</h2>
+<div class="update-box">
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.4</span></p>
+ <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
+ <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
+ <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
+ <div id="updateStatus" class="update-status"></div>
+ <div id="changelogBox" class="changelog hidden"></div>
+</div>
+<p class="small">Die App prüft die Datei <b>version.json</b> auf GitHub. Wenn eine neue Version vorhanden ist, kann der Cache geleert und die App neu geladen werden.</p>
 </section>
 
 <section class="card no-print">
@@ -885,6 +925,81 @@ window.abmelden = function() {
  document.getElementById("loginRemember").checked = false;
  document.getElementById("loginOverlay").style.display = "flex";
 };
+
+
+const APP_VERSION = "1.4";
+
+window.updatePruefen = async function() {
+ const onlineVersion = document.getElementById("onlineVersion");
+ const updateStatus = document.getElementById("updateStatus");
+ const updateButton = document.getElementById("updateButton");
+ const changelogBox = document.getElementById("changelogBox");
+
+ updateStatus.textContent = "Prüfe auf Updates...";
+ updateStatus.className = "update-status";
+ updateButton.classList.add("hidden");
+ changelogBox.classList.add("hidden");
+
+ try {
+  const response = await fetch("version.json?cache=" + Date.now(), { cache: "no-store" });
+  if (!response.ok) {
+   throw new Error("version.json nicht gefunden");
+  }
+
+  const info = await response.json();
+  const neueVersion = String(info.version || "").replace(/^v/i, "");
+  const aktuelleVersion = APP_VERSION;
+
+  onlineVersion.textContent = "v" + neueVersion;
+
+  if (neueVersion && neueVersion !== aktuelleVersion) {
+   updateStatus.textContent = "⚠ Neue Version verfügbar.";
+   updateStatus.className = "update-status update-new";
+   updateButton.classList.remove("hidden");
+
+   if (info.hinweis || info.changelog) {
+    changelogBox.textContent = (info.hinweis ? info.hinweis + "\\n\\n" : "") + (info.changelog || "");
+    changelogBox.classList.remove("hidden");
+   }
+  } else {
+   updateStatus.textContent = "✅ Du nutzt die aktuelle Version.";
+   updateStatus.className = "update-status update-current";
+
+   if (info.changelog) {
+    changelogBox.textContent = info.changelog;
+    changelogBox.classList.remove("hidden");
+   }
+  }
+ } catch (error) {
+  console.error(error);
+  onlineVersion.textContent = "nicht verfügbar";
+  updateStatus.textContent = "Update-Prüfung nicht möglich. Prüfe, ob version.json auf GitHub liegt.";
+  updateStatus.className = "update-status update-new";
+ }
+};
+
+window.jetztAktualisieren = async function() {
+ try {
+  if ("serviceWorker" in navigator) {
+   const registrations = await navigator.serviceWorker.getRegistrations();
+   for (const registration of registrations) {
+    await registration.unregister();
+   }
+  }
+
+  if ("caches" in window) {
+   const keys = await caches.keys();
+   await Promise.all(keys.map(key => caches.delete(key)));
+  }
+
+  localStorage.setItem("schulmanagerLetztesUpdate", new Date().toISOString());
+  window.location.reload(true);
+ } catch (error) {
+  console.error(error);
+  alert("Automatisches Aktualisieren fehlgeschlagen. Bitte Browser-Cache löschen oder App neu öffnen.");
+ }
+};
+
 
 function escapeHtml(text) {
  return String(text)
