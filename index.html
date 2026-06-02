@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.4.1 Update-Checker</title>
+<title>SchulManager – Hausmeisterportal v1.4.2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -220,8 +220,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.4.1 Update-Checker</h1>
-<p>Foto-Manager mit Update-Prüfung und ausklappbarem Changelog</p>
+<h1>SchulManager – Hausmeisterportal v1.4.2</h1>
+<p>Foto-Manager ohne Galerie-Button</p>
 </header>
 
 <main>
@@ -240,7 +240,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.4:</b> Meldungen werden über Firebase synchronisiert. Fotos und Update-Prüfung sind integriert.
+<b>Cloud-Version v1.4.2:</b> Meldungen werden über Firebase synchronisiert. Kamera, Datei-Auswahl und Drag & Drop sind integriert.
 </div>
 
 <label>Meldungsbereich</label>
@@ -291,19 +291,17 @@ th { background:#e8edf3; }
 
 <div class="photo-actions">
  <button type="button" onclick="document.getElementById('kameraInput').click()">📷 Foto aufnehmen</button>
- <button type="button" onclick="document.getElementById('galerieInput').click()">🖼 Bild aus Galerie auswählen</button>
  <button type="button" onclick="document.getElementById('dateiInput').click()">📁 Bild aus Dateien auswählen</button>
 </div>
 
 <div id="dropZone" class="drop-zone">🖱️ Bilder hier hineinziehen oder klicken zum Auswählen</div>
 
 <input class="hidden" type="file" id="kameraInput" accept="image/*" capture="environment">
-<input class="hidden" type="file" id="galerieInput" accept="image/*" multiple>
 <input class="hidden" type="file" id="dateiInput" accept="image/*" multiple>
 
 <div id="fotoAnzahl" class="photo-count">Keine Fotos ausgewählt</div>
 <div id="fotoVorschau" class="photo-preview"></div>
-<p class="small">Du kannst Fotos aufnehmen, Bilder aus der Galerie/Dateien auswählen oder Bilder am PC per Drag & Drop hineinziehen.</p>
+<p class="small">Du kannst Fotos aufnehmen, Bilder aus Dateien auswählen oder Bilder am PC per Drag & Drop hineinziehen.</p>
 
 
 <button id="speicherButton" class="success" onclick="speichern()">Meldung speichern</button>
@@ -315,7 +313,7 @@ th { background:#e8edf3; }
 <section class="card no-print">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.4.1</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.4.2</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -541,7 +539,7 @@ function aktuellerTitel() {
 }
 
 
-["kameraInput", "galerieInput", "dateiInput"].forEach(inputId => {
+["kameraInput", "dateiInput"].forEach(inputId => {
  const input = document.getElementById(inputId);
  input.addEventListener("change", async function(event) {
   await fotosHinzufuegen(Array.from(event.target.files));
@@ -821,7 +819,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.3-foto-manager",
+  version: "schulmanager-v1.4.2-ohne-galerie",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -937,7 +935,7 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.4.1";
+const APP_VERSION = "1.4.2";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");

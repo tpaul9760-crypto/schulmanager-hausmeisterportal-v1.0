@@ -1,5 +1,5 @@
 {
-  "version": "1.4.1",
-  "hinweis": "SchulManager v1.4.1 ist verfügbar.",
-  "changelog": "v1.4.1\n- Changelog wird jetzt als aufklappbares Menü angezeigt\n- Keine lange Changelog-Anzeige mehr direkt in der App\n\nv1.4\n- Update-Prüfung eingebaut\n- Anzeige aktuelle/verfügbare Version\n- Button zum Cache leeren und Aktualisieren\n\nv1.3\n- Foto aufnehmen\n- Galerie auswählen\n- Dateien auswählen\n- Drag & Drop bleibt erhalten\n\nv1.2\n- Mobile Kartenansicht\n- größere Buttons und Eingabefelder\n\nv1.1\n- Fotos und Export/Import inkl. Fotos"
+  "version": "1.4.2",
+  "hinweis": "SchulManager v1.4.2 ist verfügbar.",
+  "changelog": "v1.4.2\n- Button „Bild aus Galerie auswählen“ entfernt\n- Kamera bleibt erhalten\n- Datei-Auswahl bleibt erhalten\n- Drag & Drop bleibt erhalten"
 }

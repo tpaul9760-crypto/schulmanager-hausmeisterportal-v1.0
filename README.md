@@ -1,12 +1,3 @@
-# SchulManager Hausmeisterportal v1.4.1
+SchulManager v1.4.2
 
-## Änderung
-- Changelog wird nicht mehr offen angezeigt.
-- Changelog erscheint nur noch in einem aufklappbaren Menü.
-- Update-Checker bleibt erhalten.
-
-## Wichtig
-Bitte bei GitHub alle Dateien hochladen, besonders:
-- index.html
-- version.json
-- service-worker.js
+Button „Bild aus Galerie auswählen“ entfernt. Kamera, Datei-Auswahl und Drag & Drop bleiben erhalten.
