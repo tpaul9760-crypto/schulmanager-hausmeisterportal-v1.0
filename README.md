@@ -11,5 +11,6 @@ Mobile optimierte Version.
 - Fotos, Firebase, Export/Import bleiben erhalten
 
 ## Login
-Benutzername: GSR-Hausmeister
-Passwort: GSR2026
+das ist eine Testversion zugang nicht möglich nur Admin 
+nutze die offline versionen .
+
