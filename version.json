@@ -1,5 +1,5 @@
 {
-  "version": "1.5.1",
-  "hinweis": "SchulManager v1.5.1 ist verfügbar.",
-  "changelog": "v1.5.1\n- Raumverwaltung liegt jetzt in einem Popup\n- Hauptseite ist wieder kompakter\n- Räume hinzufügen/entfernen bleibt erhalten\n- Raumauswahl bei Meldungen bleibt erhalten\n\nv1.5\n- Raumverwaltung hinzugefügt"
+  "version": "1.5.2",
+  "hinweis": "SchulManager v1.5.2 ist verfügbar.",
+  "changelog": "v1.5.2\n- Raumverwaltung-Button korrigiert\n- Popup öffnet jetzt zuverlässig\n\nv1.5.1\n- Raumverwaltung in Popup verschoben"
 }

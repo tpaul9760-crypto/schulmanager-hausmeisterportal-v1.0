@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.5.1</title>
+<title>SchulManager – Hausmeisterportal v1.5.2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -320,8 +320,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.5.1</h1>
-<p>Foto-Manager mit Raumverwaltung im Popup</p>
+<h1>SchulManager – Hausmeisterportal v1.5.2</h1>
+<p>Foto-Manager mit korrigierter Raumverwaltung</p>
 </header>
 
 <main>
@@ -342,7 +342,7 @@ th { background:#e8edf3; }
   <h2 style="margin-bottom:6px;">🏫 Räume</h2>
   <p class="small" style="margin-top:0;">Räume verwalten oder bei Meldungen auswählen.</p>
  </div>
- <button onclick="raeumePopupOeffnen()">🏫 Räume verwalten</button>
+ <button id="raumverwaltungButton" type="button">🏫 Räume verwalten</button>
 </div>
 </section>
 
@@ -373,7 +373,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.5.1:</b> Meldungen werden über Firebase synchronisiert. Räume können jetzt verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.5.2:</b> Meldungen werden über Firebase synchronisiert. Räume können jetzt verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -451,7 +451,7 @@ th { background:#e8edf3; }
 <section class="card no-print">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.5.1</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.5.2</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -973,7 +973,50 @@ function formularLeeren() {
  document.getElementById("abbrechenButton").classList.add("hidden");
  document.getElementById("formularTitel").textContent = "Neue Meldung erfassen";
  if (document.getElementById("raumAuswahl")) document.getElementById("raumAuswahl").value = "";
- loginStart();
+ 
+function raumPopupInitialisieren() {
+ const btn = document.getElementById("raumverwaltungButton");
+ if (btn) {
+  btn.addEventListener("click", function() {
+   if (typeof raeumeAktualisieren === "function") {
+    raeumeAktualisieren();
+   }
+   const modal = document.getElementById("raumModal");
+   if (modal) {
+    modal.style.display = "flex";
+   } else {
+    alert("Raumverwaltung konnte nicht geöffnet werden.");
+   }
+  });
+ }
+}
+
+window.raeumePopupOeffnen = function() {
+ if (typeof raeumeAktualisieren === "function") {
+  raeumeAktualisieren();
+ }
+ const modal = document.getElementById("raumModal");
+ if (modal) {
+  modal.style.display = "flex";
+  setTimeout(() => {
+   const input = document.getElementById("neuerRaum");
+   if (input) input.focus();
+  }, 100);
+ }
+};
+
+window.raeumePopupSchliessen = function() {
+ const modal = document.getElementById("raumModal");
+ if (modal) modal.style.display = "none";
+};
+
+window.raeumePopupHintergrundSchliessen = function(event) {
+ if (event.target && event.target.id === "raumModal") {
+  window.raeumePopupSchliessen();
+ }
+};
+
+loginStart();
 heuteSetzen();
  schadenAuswahlAktualisieren();
 }
@@ -1044,7 +1087,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.5.1-raumverwaltung-popup",
+  version: "schulmanager-v1.5.2-raumverwaltung-popup-fix",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1168,7 +1211,7 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.5.1";
+const APP_VERSION = "1.5.2";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");
@@ -1258,11 +1301,55 @@ function escapeHtml(text) {
 
 document.getElementById("bereichTyp").addEventListener("change", () => schadenAuswahlAktualisieren());
 
+
+function raumPopupInitialisieren() {
+ const btn = document.getElementById("raumverwaltungButton");
+ if (btn) {
+  btn.addEventListener("click", function() {
+   if (typeof raeumeAktualisieren === "function") {
+    raeumeAktualisieren();
+   }
+   const modal = document.getElementById("raumModal");
+   if (modal) {
+    modal.style.display = "flex";
+   } else {
+    alert("Raumverwaltung konnte nicht geöffnet werden.");
+   }
+  });
+ }
+}
+
+window.raeumePopupOeffnen = function() {
+ if (typeof raeumeAktualisieren === "function") {
+  raeumeAktualisieren();
+ }
+ const modal = document.getElementById("raumModal");
+ if (modal) {
+  modal.style.display = "flex";
+  setTimeout(() => {
+   const input = document.getElementById("neuerRaum");
+   if (input) input.focus();
+  }, 100);
+ }
+};
+
+window.raeumePopupSchliessen = function() {
+ const modal = document.getElementById("raumModal");
+ if (modal) modal.style.display = "none";
+};
+
+window.raeumePopupHintergrundSchliessen = function(event) {
+ if (event.target && event.target.id === "raumModal") {
+  window.raeumePopupSchliessen();
+ }
+};
+
 loginStart();
 heuteSetzen();
 schadenAuswahlAktualisieren();
 fotoVorschauAktualisieren();
 raeumeAktualisieren();
+raumPopupInitialisieren();
 
 const q = query(meldungenRef, orderBy("erstelltAm", "desc"));
 onSnapshot(q, (snapshot) => {

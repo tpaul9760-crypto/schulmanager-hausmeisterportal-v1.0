@@ -1,7 +1,6 @@
-# SchulManager v1.5.1 Raumverwaltung Popup
+# SchulManager v1.5.2
 
-## Änderung
-- Raumverwaltung ist jetzt in einem Popup versteckt.
-- Hauptseite bleibt kompakter.
+## Korrektur
+- Raumverwaltung-Button funktioniert jetzt.
+- Popup öffnet zuverlässig.
 - Räume hinzufügen/entfernen bleibt erhalten.
-- Raumauswahl bei Meldungen bleibt erhalten.
