@@ -1,5 +1,5 @@
 {
-  "version": "1.4.2",
-  "hinweis": "SchulManager v1.4.2 ist verfügbar.",
-  "changelog": "v1.4.2\n- Button „Bild aus Galerie auswählen“ entfernt\n- Kamera bleibt erhalten\n- Datei-Auswahl bleibt erhalten\n- Drag & Drop bleibt erhalten"
+  "version": "1.5",
+  "hinweis": "SchulManager v1.5 ist verfügbar.",
+  "changelog": "v1.5\n- Neuer Reiter „Räume verwalten“\n- Räume hinzufügen und entfernen\n- Raumauswahl bei neuen Meldungen\n- Freitext-Ort bleibt möglich\n\nv1.4.2\n- Galerie-Button entfernt\n- Kamera, Dateien und Drag & Drop bleiben erhalten"
 }

@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.4.2</title>
+<title>SchulManager – Hausmeisterportal v1.5 Raumverwaltung</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -186,6 +186,41 @@ th { background:#e8edf3; }
  color: #1f3b57;
 }
 
+
+.room-list {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+ gap: 8px;
+ margin-top: 10px;
+}
+.room-item {
+ background: #e8edf3;
+ border-radius: 6px;
+ padding: 8px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ gap: 8px;
+}
+.room-item span { word-break: break-word; }
+.room-item button {
+ background: #a82626;
+ padding: 6px 9px;
+ margin: 0;
+ min-height: auto;
+ width: auto;
+}
+.room-controls {
+ display: grid;
+ grid-template-columns: 1fr auto;
+ gap: 8px;
+ align-items: end;
+}
+@media (max-width: 760px) {
+ .room-controls { display: block; }
+ .room-item button { width: auto; min-height: auto; }
+}
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -220,8 +255,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.4.2</h1>
-<p>Foto-Manager ohne Galerie-Button</p>
+<h1>SchulManager – Hausmeisterportal v1.5 Raumverwaltung</h1>
+<p>Foto-Manager mit Raumverwaltung</p>
 </header>
 
 <main>
@@ -237,10 +272,27 @@ th { background:#e8edf3; }
 </section>
 
 <section class="card no-print">
+<h2>🏫 Räume verwalten</h2>
+<div class="notice small">
+Hier kannst du Räume, Toilettenbereiche, Schulhofbereiche oder Gebäudeabschnitte anlegen. Danach erscheinen sie bei jeder Meldung in der Raumauswahl.
+</div>
+
+<div class="room-controls">
+ <div>
+  <label>Neuen Raum / Bereich hinzufügen</label>
+  <input type="text" id="neuerRaum" placeholder="z. B. R107, Jungentoilette EG, Turnhalle, Schulhof">
+ </div>
+ <button class="success" onclick="raumHinzufuegen()">Raum hinzufügen</button>
+</div>
+
+<div id="raumListe" class="room-list"></div>
+</section>
+
+<section class="card no-print">
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.4.2:</b> Meldungen werden über Firebase synchronisiert. Kamera, Datei-Auswahl und Drag & Drop sind integriert.
+<b>Cloud-Version v1.5:</b> Meldungen werden über Firebase synchronisiert. Räume können jetzt verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -270,6 +322,11 @@ th { background:#e8edf3; }
 
 <label>Uhrzeit</label>
 <input type="time" id="uhrzeit">
+
+<label>Raum auswählen</label>
+<select id="raumAuswahl" onchange="raumAuswahlGeaendert()">
+<option value="">-- Raum auswählen --</option>
+</select>
 
 <label>Ort / Raum / Bereich</label>
 <input type="text" id="ort" placeholder="z. B. R107, Jungentoilette, Turnhalle, Schulhof">
@@ -313,7 +370,7 @@ th { background:#e8edf3; }
 <section class="card no-print">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.4.2</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.5</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -450,6 +507,91 @@ let fotosAktuell = [];
 let bearbeitungsId = null;
 let aktuelleGalerie = [];
 let aktuellesFotoIndex = 0;
+
+const RAUM_KEY = "schulmanagerRaeume";
+const standardRaeume = [
+ "Jungentoilette EG",
+ "Mädchentoilette EG",
+ "Jungentoilette OG",
+ "Mädchentoilette OG",
+ "Lehrertoilette",
+ "Sekretariat",
+ "Lehrerzimmer",
+ "Mensa",
+ "Turnhalle",
+ "Schulhof",
+ "Technikraum"
+];
+
+function raeumeLaden() {
+ const gespeichert = localStorage.getItem(RAUM_KEY);
+ if (gespeichert) return JSON.parse(gespeichert);
+ localStorage.setItem(RAUM_KEY, JSON.stringify(standardRaeume));
+ return [...standardRaeume];
+}
+
+function raeumeSpeichern(raeume) {
+ localStorage.setItem(RAUM_KEY, JSON.stringify(raeume));
+}
+
+function raeumeAktualisieren() {
+ const raeume = raeumeLaden();
+ const select = document.getElementById("raumAuswahl");
+ const liste = document.getElementById("raumListe");
+
+ if (select) {
+  const aktuellerOrt = document.getElementById("ort") ? document.getElementById("ort").value : "";
+  select.innerHTML = '<option value="">-- Raum auswählen --</option>';
+  raeume.forEach(raum => {
+   const option = document.createElement("option");
+   option.value = raum;
+   option.textContent = raum;
+   select.appendChild(option);
+  });
+  if (aktuellerOrt && raeume.includes(aktuellerOrt)) select.value = aktuellerOrt;
+ }
+
+ if (liste) {
+  liste.innerHTML = "";
+  raeume.forEach(raum => {
+   const item = document.createElement("div");
+   item.className = "room-item";
+   item.innerHTML = `<span>${escapeHtml(raum)}</span><button onclick="raumEntfernen('${escapeJs(raum)}')">Entfernen</button>`;
+   liste.appendChild(item);
+  });
+ }
+}
+
+window.raumAuswahlGeaendert = function() {
+ const wert = document.getElementById("raumAuswahl").value;
+ if (wert) document.getElementById("ort").value = wert;
+};
+
+window.raumHinzufuegen = function() {
+ const input = document.getElementById("neuerRaum");
+ const neuerRaum = input.value.trim();
+ if (!neuerRaum) {
+  alert("Bitte einen Raum oder Bereich eintragen.");
+  return;
+ }
+ const raeume = raeumeLaden();
+ if (raeume.includes(neuerRaum)) {
+  alert("Dieser Raum ist bereits vorhanden.");
+  return;
+ }
+ raeume.push(neuerRaum);
+ raeume.sort((a,b) => a.localeCompare(b, "de"));
+ raeumeSpeichern(raeume);
+ input.value = "";
+ raeumeAktualisieren();
+};
+
+window.raumEntfernen = function(raum) {
+ if (!confirm("Raum wirklich entfernen? Bestehende Meldungen bleiben erhalten.")) return;
+ const raeume = raeumeLaden().filter(r => r !== raum);
+ raeumeSpeichern(raeume);
+ raeumeAktualisieren();
+};
 
 const schadenVorlagen = {
  "🚻 Toiletten / Sanitär": [
@@ -714,6 +856,7 @@ window.bearbeiten = function(id) {
  ["datum","uhrzeit","ort","beschreibung","massnahme","gemeldetVon","bearbeitetVon"].forEach(k => {
   document.getElementById(k).value = e[k] || "";
  });
+ raeumeAktualisieren();
 
  fotosAktuell = e.fotos || [];
  fotoVorschauAktualisieren();
@@ -748,6 +891,7 @@ function formularLeeren() {
  document.getElementById("speicherButton").textContent = "Meldung speichern";
  document.getElementById("abbrechenButton").classList.add("hidden");
  document.getElementById("formularTitel").textContent = "Neue Meldung erfassen";
+ if (document.getElementById("raumAuswahl")) document.getElementById("raumAuswahl").value = "";
  loginStart();
 heuteSetzen();
  schadenAuswahlAktualisieren();
@@ -819,7 +963,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.4.2-ohne-galerie",
+  version: "schulmanager-v1.5-raumverwaltung",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -935,7 +1079,7 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.4.2";
+const APP_VERSION = "1.5";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");
@@ -1010,6 +1154,10 @@ window.jetztAktualisieren = async function() {
 };
 
 
+function escapeJs(text) {
+ return String(text).replaceAll("\\", "\\\\").replaceAll("'", "\\'").replaceAll("\n", " ");
+}
+
 function escapeHtml(text) {
  return String(text)
   .replaceAll("&","&amp;")
@@ -1025,6 +1173,7 @@ loginStart();
 heuteSetzen();
 schadenAuswahlAktualisieren();
 fotoVorschauAktualisieren();
+raeumeAktualisieren();
 
 const q = query(meldungenRef, orderBy("erstelltAm", "desc"));
 onSnapshot(q, (snapshot) => {
