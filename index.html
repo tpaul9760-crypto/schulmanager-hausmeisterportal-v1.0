@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.8.0 Räume Cloud</title>
+<title>SchulManager – Hausmeisterportal v1.8.1 Räume Cloud Fix</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -402,7 +402,7 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.8.0 Räume Cloud</h1>
+<h1>SchulManager – Hausmeisterportal v1.8.1 Räume Cloud Fix</h1>
 <p>Foto-Manager mit Status-System und Cloud-Räumen</p>
 </header>
 
@@ -472,7 +472,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.8.0:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.8.1:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -562,7 +562,7 @@ th { background:#e8edf3; }
 <section class="card no-print">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.8.0</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.8.1</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -1043,7 +1043,7 @@ function raeumeFirebaseStarten() {
   .then(() => lokaleRaeumeZuFirebaseMigrieren())
   .catch(error => console.error("Raum-Initialisierung fehlgeschlagen:", error));
 
- onSnapshot(query(raeumeRef, orderBy("kategorie"), orderBy("name")), (snapshot) => {
+ onSnapshot(raeumeRef, (snapshot) => {
   raeumeCloud = {};
   snapshot.docs.forEach(d => {
    raeumeCloud[d.id] = { id: d.id, ...d.data() };
@@ -1447,7 +1447,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.8.0-cloud-raeume",
+  version: "schulmanager-v1.8.1-cloud-raeume-fix",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1563,7 +1563,7 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.8.0";
+const APP_VERSION = "1.8.1";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");
