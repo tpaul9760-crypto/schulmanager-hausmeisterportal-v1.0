@@ -1,8 +1,3 @@
-# SchulManager v1.7.2 Raumliste
+SchulManager v1.8.0 Cloud-Räume
 
-## Änderung
-- Raumverwaltung aufgeräumt
-- Räume werden kompakt als Liste angezeigt
-- Raumnamen bleiben lesbar
-- Suchfeld für Räume ergänzt
-- Login, Firebase und Status-System unverändert
+Räume werden jetzt über Firebase synchronisiert.

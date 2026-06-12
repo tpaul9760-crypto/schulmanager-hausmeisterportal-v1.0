@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.7.2 Raumliste</title>
+<title>SchulManager – Hausmeisterportal v1.8.0 Räume Cloud</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -320,74 +320,52 @@ th { background:#e8edf3; }
 .status-erledigt { background:#dff3e6; color:#237a3b; border:1px solid #7ab88a; }
 
 
-/* v1.7.2 - aufgeräumte Raumverwaltung als Liste */
-.room-category-content {
- padding: 0 !important;
- display: block !important;
-}
-.room-category-content.collapsed {
- display: none !important;
-}
+/* v1.8.0 - Räume aus Firebase + kompakte Liste */
+.room-category-content { padding:0!important; display:block!important; }
+.room-category-content.collapsed { display:none!important; }
 .room-item {
- background: #fff !important;
- border-radius: 0 !important;
- padding: 9px 10px !important;
- display: flex !important;
- justify-content: space-between !important;
- align-items: center !important;
- gap: 10px !important;
- border-top: 1px solid #d6dde7 !important;
- min-height: auto !important;
+ background:#fff!important;
+ border-radius:0!important;
+ padding:9px 10px!important;
+ display:flex!important;
+ justify-content:space-between!important;
+ align-items:center!important;
+ gap:10px!important;
+ border-top:1px solid #d6dde7!important;
 }
-.room-item:hover {
- background: #f8fafc !important;
-}
+.room-item:hover { background:#f8fafc!important; }
 .room-item span {
- flex: 1 !important;
- min-width: 0 !important;
- white-space: normal !important;
- word-break: normal !important;
- overflow-wrap: anywhere !important;
- line-height: 1.35 !important;
+ flex:1!important;
+ min-width:0!important;
+ white-space:normal!important;
+ word-break:normal!important;
+ overflow-wrap:anywhere!important;
+ line-height:1.35!important;
 }
 .room-item span::before {
- content: "•";
- color: #237a3b;
- font-weight: bold;
- margin-right: 8px;
+ content:"•";
+ color:#237a3b;
+ font-weight:bold;
+ margin-right:8px;
 }
 .room-item-actions {
- display: flex !important;
- gap: 6px !important;
- flex-wrap: nowrap !important;
- flex-shrink: 0 !important;
+ display:flex!important;
+ gap:6px!important;
+ flex-wrap:nowrap!important;
+ flex-shrink:0!important;
 }
 .room-item-actions button {
- width: auto !important;
- min-height: auto !important;
- padding: 6px 9px !important;
- margin: 0 !important;
+ width:auto!important;
+ min-height:auto!important;
+ padding:6px 9px!important;
+ margin:0!important;
 }
-.room-edit-button {
- background: #1f3b57 !important;
-}
-.room-delete-button {
- background: #a82626 !important;
-}
-#raumSuche {
- margin-bottom: 10px;
-}
-@media (max-width: 760px) {
- .room-item {
-  flex-direction: column !important;
-  align-items: stretch !important;
- }
- .room-item-actions {
-  width: 100% !important;
- }
- .room-item-actions button {
-  flex: 1 !important;
- }
+.room-delete-button { background:#a82626!important; }
+#raumSuche { margin-bottom:10px; }
+@media (max-width:760px) {
+ .room-item { flex-direction:column!important; align-items:stretch!important; }
+ .room-item-actions { width:100%!important; }
+ .room-item-actions button { flex:1; }
 }
 
 @media print {
@@ -424,8 +402,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.7.2 Raumliste</h1>
-<p>Foto-Manager mit Status-System und Raumliste</p>
+<h1>SchulManager – Hausmeisterportal v1.8.0 Räume Cloud</h1>
+<p>Foto-Manager mit Status-System und Cloud-Räumen</p>
 </header>
 
 <main>
@@ -461,7 +439,7 @@ th { background:#e8edf3; }
   </div>
 
   <div class="notice small">
-  Räume werden lokal auf deinem Gerät gespeichert und erscheinen danach in der Raumauswahl.
+  Räume werden über Firebase synchronisiert und erscheinen auf allen Geräten in der Raumauswahl.
   </div>
 
   <div class="room-controls">
@@ -494,7 +472,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.7.2:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.8.0:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -584,7 +562,7 @@ th { background:#e8edf3; }
 <section class="card no-print">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.7.2</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.8.0</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -665,7 +643,9 @@ import {
   onSnapshot,
   query,
   orderBy,
-  serverTimestamp
+  serverTimestamp,
+  getDocs,
+  where
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 
@@ -724,6 +704,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const meldungenRef = collection(db, "meldungen");
+const raeumeRef = collection(db, "raeume");
 
 let eintraege = [];
 let fotosAktuell = [];
@@ -732,6 +713,11 @@ let aktuelleGalerie = [];
 let aktuellesFotoIndex = 0;
 
 const RAUM_KEY = "schulmanagerRaeumeKategorisiert";
+const RAUM_MIGRATION_KEY = "schulmanagerRaeumeFirebaseMigriert";
+
+let raeumeCloud = {};
+let raeumeGeladen = false;
+
 const raumKategorien = [
  "🚻 Toiletten / Sanitär",
  "🧑‍🏫 Klassenräume",
@@ -752,10 +738,29 @@ const standardRaeumeKategorisiert = {
  "📦 Sonstiges": ["Sonstiger Bereich"]
 };
 
+function leereRaumStruktur() {
+ const daten = {};
+ raumKategorien.forEach(kategorie => daten[kategorie] = []);
+ return daten;
+}
+
+function raumStrukturAusCloud() {
+ const daten = leereRaumStruktur();
+ Object.values(raeumeCloud).forEach(raum => {
+  const kategorie = raum.kategorie || "📦 Sonstiges";
+  if (!daten[kategorie]) daten[kategorie] = [];
+  if (raum.name && !daten[kategorie].includes(raum.name)) daten[kategorie].push(raum.name);
+ });
+ raumKategorien.forEach(kategorie => daten[kategorie].sort((a,b) => a.localeCompare(b, "de")));
+ return daten;
+}
+
 function raeumeLaden() {
- const gespeichert = localStorage.getItem(RAUM_KEY);
- if (gespeichert) return JSON.parse(gespeichert);
- localStorage.setItem(RAUM_KEY, JSON.stringify(standardRaeumeKategorisiert));
+ if (raeumeGeladen) return raumStrukturAusCloud();
+ const lokal = localStorage.getItem(RAUM_KEY);
+ if (lokal) {
+  try { return JSON.parse(lokal); } catch(e) {}
+ }
  return JSON.parse(JSON.stringify(standardRaeumeKategorisiert));
 }
 
@@ -764,8 +769,52 @@ function raeumeSpeichern(raeume) {
 }
 
 function alleRaeumeAlsListe() {
- const daten = raeumeLaden();
- return Object.values(daten).flat();
+ return Object.values(raeumeLaden()).flat();
+}
+
+async function raumExistiert(name) {
+ const snapshot = await getDocs(query(raeumeRef, where("name", "==", name)));
+ return !snapshot.empty;
+}
+
+async function standardRaeumeInFirebaseAnlegen() {
+ const snapshot = await getDocs(raeumeRef);
+ if (!snapshot.empty) return;
+
+ for (const kategorie of raumKategorien) {
+  for (const name of (standardRaeumeKategorisiert[kategorie] || [])) {
+   await addDoc(raeumeRef, { name, kategorie, erstelltAm: serverTimestamp(), quelle: "standard" });
+  }
+ }
+}
+
+async function lokaleRaeumeZuFirebaseMigrieren() {
+ if (localStorage.getItem(RAUM_MIGRATION_KEY) === "true") return;
+
+ const lokal = localStorage.getItem(RAUM_KEY);
+ if (!lokal) {
+  localStorage.setItem(RAUM_MIGRATION_KEY, "true");
+  return;
+ }
+
+ try {
+  const daten = JSON.parse(lokal);
+  for (const kategorie of Object.keys(daten)) {
+   for (const name of (daten[kategorie] || [])) {
+    if (!(await raumExistiert(name))) {
+     await addDoc(raeumeRef, {
+      name,
+      kategorie: raumKategorien.includes(kategorie) ? kategorie : "📦 Sonstiges",
+      erstelltAm: serverTimestamp(),
+      quelle: "migration"
+     });
+    }
+   }
+  }
+  localStorage.setItem(RAUM_MIGRATION_KEY, "true");
+ } catch(error) {
+  console.error("Migration lokaler Räume fehlgeschlagen:", error);
+ }
 }
 
 function raeumeAktualisieren() {
@@ -774,6 +823,7 @@ function raeumeAktualisieren() {
 
  const verwaltungKategorie = document.getElementById("raumKategorie");
  if (verwaltungKategorie) {
+  const alt = verwaltungKategorie.value;
   verwaltungKategorie.innerHTML = "";
   raumKategorien.forEach(kategorie => {
    const option = document.createElement("option");
@@ -781,6 +831,7 @@ function raeumeAktualisieren() {
    option.textContent = kategorie;
    verwaltungKategorie.appendChild(option);
   });
+  if (alt) verwaltungKategorie.value = alt;
  }
 
  const meldungKategorie = document.getElementById("meldungRaumKategorie");
@@ -824,15 +875,24 @@ function raeumeAktualisieren() {
    });
   }
 
-  if (ortWert && alleRaeumeAlsListe().includes(ortWert)) {
-   raumSelect.value = ortWert;
-  }
+  if (ortWert && alleRaeumeAlsListe().includes(ortWert)) raumSelect.value = ortWert;
  }
 
  const liste = document.getElementById("raumListe");
  if (liste) {
   liste.innerHTML = "";
+
+  if (!raeumeGeladen) {
+   const hinweis = document.createElement("div");
+   hinweis.className = "notice small";
+   hinweis.textContent = "Räume werden aus Firebase geladen...";
+   liste.appendChild(hinweis);
+   return;
+  }
+
   raumKategorien.forEach(kategorie => {
+   const sichtbareRaeume = (daten[kategorie] || []).filter(raum => !raumFilter || raum.toLowerCase().includes(raumFilter));
+
    const block = document.createElement("div");
    block.className = "room-category-block";
 
@@ -842,19 +902,18 @@ function raeumeAktualisieren() {
    const content = document.createElement("div");
    content.className = "room-category-content";
 
-   header.innerHTML = "<span>" + escapeHtml(kategorie) + "</span><span>" + ((daten[kategorie] || []).length) + "</span>";
-   header.onclick = function() {
-    content.classList.toggle("collapsed");
-   };
+   header.innerHTML = "<span>" + escapeHtml(kategorie) + "</span><span>" + sichtbareRaeume.length + "</span>";
+   header.onclick = function() { content.classList.toggle("collapsed"); };
 
-   (daten[kategorie] || [])
-    .filter(raum => !raumFilter || raum.toLowerCase().includes(raumFilter))
-    .forEach(raum => {
+   sichtbareRaeume.forEach(raumName => {
+    const raumDoc = Object.values(raeumeCloud).find(r => r.name === raumName && r.kategorie === kategorie);
+    if (!raumDoc) return;
+
     const item = document.createElement("div");
     item.className = "room-item";
 
     const span = document.createElement("span");
-    span.textContent = raum;
+    span.textContent = raumName;
 
     const actions = document.createElement("div");
     actions.className = "room-item-actions";
@@ -862,16 +921,12 @@ function raeumeAktualisieren() {
     const editBtn = document.createElement("button");
     editBtn.textContent = "Bearbeiten";
     editBtn.className = "room-edit-button";
-    editBtn.onclick = function() {
-     raumBearbeiten(kategorie, raum);
-    };
+    editBtn.onclick = function() { raumBearbeiten(raumDoc.id, kategorie, raumName); };
 
     const btn = document.createElement("button");
     btn.textContent = "Entfernen";
     btn.className = "room-delete-button";
-    btn.onclick = function() {
-     raumEntfernen(kategorie, raum);
-    };
+    btn.onclick = function() { raumEntfernen(raumDoc.id, raumName); };
 
     actions.appendChild(editBtn);
     actions.appendChild(btn);
@@ -898,7 +953,7 @@ window.raumAuswahlGeaendert = function() {
  if (wert) document.getElementById("ort").value = wert;
 };
 
-window.raumHinzufuegen = function() {
+window.raumHinzufuegen = async function() {
  const input = document.getElementById("neuerRaum");
  const kategorieSelect = document.getElementById("raumKategorie");
  const neuerRaum = input.value.trim();
@@ -909,21 +964,21 @@ window.raumHinzufuegen = function() {
   return;
  }
 
- const daten = raeumeLaden();
- const vorhanden = Object.values(daten).some(liste => liste.includes(neuerRaum));
- if (vorhanden) {
+ if (await raumExistiert(neuerRaum)) {
   alert("Dieser Raum ist bereits vorhanden.");
   return;
  }
 
- daten[kategorie].push(neuerRaum);
- daten[kategorie].sort((a,b) => a.localeCompare(b, "de"));
- raeumeSpeichern(daten);
- input.value = "";
- raeumeAktualisieren();
+ try {
+  await addDoc(raeumeRef, { name: neuerRaum, kategorie, erstelltAm: serverTimestamp(), quelle: "manuell" });
+  input.value = "";
+ } catch(error) {
+  console.error(error);
+  alert("Raum konnte nicht in Firebase gespeichert werden.");
+ }
 };
 
-window.raumBearbeiten = function(kategorie, raum) {
+window.raumBearbeiten = async function(raumId, kategorie, raum) {
  const neuerName = prompt("Raum bearbeiten:", raum);
  if (neuerName === null) return;
 
@@ -933,33 +988,34 @@ window.raumBearbeiten = function(kategorie, raum) {
   return;
  }
 
- const daten = raeumeLaden();
- const bereitsVorhanden = Object.values(daten).some(liste => liste.includes(bereinigt));
-
- if (bereitsVorhanden && bereinigt !== raum) {
+ if (bereinigt !== raum && await raumExistiert(bereinigt)) {
   alert("Dieser Raumname ist bereits vorhanden.");
   return;
  }
 
- daten[kategorie] = (daten[kategorie] || []).map(r => r === raum ? bereinigt : r);
- daten[kategorie].sort((a,b) => a.localeCompare(b, "de"));
- raeumeSpeichern(daten);
+ try {
+  await updateDoc(doc(db, "raeume", raumId), {
+   name: bereinigt,
+   kategorie,
+   zuletztGeaendert: new Date().toLocaleString("de-DE")
+  });
 
- // Hinweis: Bestehende Meldungen behalten ihren alten Ortstext.
- // Neue Meldungen nutzen ab jetzt den geänderten Raumnamen.
- if (document.getElementById("ort").value === raum) {
-  document.getElementById("ort").value = bereinigt;
+  if (document.getElementById("ort").value === raum) document.getElementById("ort").value = bereinigt;
+ } catch(error) {
+  console.error(error);
+  alert("Raum konnte nicht geändert werden.");
  }
-
- raeumeAktualisieren();
 };
 
-window.raumEntfernen = function(kategorie, raum) {
+window.raumEntfernen = async function(raumId, raum) {
  if (!confirm("Raum wirklich entfernen? Bestehende Meldungen bleiben erhalten.")) return;
- const daten = raeumeLaden();
- daten[kategorie] = (daten[kategorie] || []).filter(r => r !== raum);
- raeumeSpeichern(daten);
- raeumeAktualisieren();
+
+ try {
+  await deleteDoc(doc(db, "raeume", raumId));
+ } catch(error) {
+  console.error(error);
+  alert("Raum konnte nicht gelöscht werden.");
+ }
 };
 
 window.raeumePopupOeffnen = function() {
@@ -974,20 +1030,31 @@ window.raeumePopupSchliessen = function() {
 };
 
 window.raeumePopupHintergrundSchliessen = function(event) {
- if (event.target && event.target.id === "raumModal") {
-  raeumePopupSchliessen();
- }
+ if (event.target && event.target.id === "raumModal") raeumePopupSchliessen();
 };
 
 function raumPopupInitialisieren() {
  const btn = document.getElementById("raumverwaltungButton");
- if (btn) {
-  btn.addEventListener("click", function() {
-   raeumePopupOeffnen();
-  });
- }
+ if (btn) btn.addEventListener("click", function() { raeumePopupOeffnen(); });
 }
 
+function raeumeFirebaseStarten() {
+ standardRaeumeInFirebaseAnlegen()
+  .then(() => lokaleRaeumeZuFirebaseMigrieren())
+  .catch(error => console.error("Raum-Initialisierung fehlgeschlagen:", error));
+
+ onSnapshot(query(raeumeRef, orderBy("kategorie"), orderBy("name")), (snapshot) => {
+  raeumeCloud = {};
+  snapshot.docs.forEach(d => {
+   raeumeCloud[d.id] = { id: d.id, ...d.data() };
+  });
+  raeumeGeladen = true;
+  raeumeAktualisieren();
+ }, (error) => {
+  console.error(error);
+  alert("Räume konnten nicht aus Firebase geladen werden.");
+ });
+}
 
 const schadenVorlagen = {
  "🚻 Toiletten / Sanitär": [
@@ -1380,7 +1447,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.7.2-raumliste",
+  version: "schulmanager-v1.8.0-cloud-raeume",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1496,7 +1563,7 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.7.2";
+const APP_VERSION = "1.8.0";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");
@@ -1586,7 +1653,7 @@ loginStart();
 heuteSetzen();
 schadenAuswahlAktualisieren();
 fotoVorschauAktualisieren();
-raeumeAktualisieren();
+raeumeFirebaseStarten();
 raumPopupInitialisieren();
 
 const q = query(meldungenRef, orderBy("erstelltAm", "desc"));

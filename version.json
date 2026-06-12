@@ -1,5 +1,5 @@
 {
-  "version": "1.7.2",
-  "hinweis": "SchulManager v1.7.2 ist verfügbar.",
-  "changelog": "v1.7.2\n- Raumverwaltung aufgeräumt\n- Raumnamen werden nicht mehr Buchstabe für Buchstabe umgebrochen\n- Räume werden kompakt als Liste angezeigt\n- Suchfeld für Räume ergänzt\n- Login, Firebase und Status-System unverändert\n\nv1.7.1\n- Status-System hinzugefügt"
+  "version": "1.8.0",
+  "hinweis": "SchulManager v1.8.0 ist verfügbar.",
+  "changelog": "v1.8.0\n- Räume werden jetzt über Firebase/Firestore synchronisiert\n- Räume erscheinen auf PC, Handy und Tablet\n- Lokale Räume werden einmalig übernommen\n- Login, Meldungen, Fotos und Status bleiben erhalten"
 }
