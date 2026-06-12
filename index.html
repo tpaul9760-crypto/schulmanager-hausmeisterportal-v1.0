@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.7.1 Status</title>
+<title>SchulManager – Hausmeisterportal v1.7.2 Raumliste</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -319,6 +319,77 @@ th { background:#e8edf3; }
 .status-bearbeitung { background:#dcecff; color:#1f4e79; border:1px solid #7aa7d9; }
 .status-erledigt { background:#dff3e6; color:#237a3b; border:1px solid #7ab88a; }
 
+
+/* v1.7.2 - aufgeräumte Raumverwaltung als Liste */
+.room-category-content {
+ padding: 0 !important;
+ display: block !important;
+}
+.room-category-content.collapsed {
+ display: none !important;
+}
+.room-item {
+ background: #fff !important;
+ border-radius: 0 !important;
+ padding: 9px 10px !important;
+ display: flex !important;
+ justify-content: space-between !important;
+ align-items: center !important;
+ gap: 10px !important;
+ border-top: 1px solid #d6dde7 !important;
+ min-height: auto !important;
+}
+.room-item:hover {
+ background: #f8fafc !important;
+}
+.room-item span {
+ flex: 1 !important;
+ min-width: 0 !important;
+ white-space: normal !important;
+ word-break: normal !important;
+ overflow-wrap: anywhere !important;
+ line-height: 1.35 !important;
+}
+.room-item span::before {
+ content: "•";
+ color: #237a3b;
+ font-weight: bold;
+ margin-right: 8px;
+}
+.room-item-actions {
+ display: flex !important;
+ gap: 6px !important;
+ flex-wrap: nowrap !important;
+ flex-shrink: 0 !important;
+}
+.room-item-actions button {
+ width: auto !important;
+ min-height: auto !important;
+ padding: 6px 9px !important;
+ margin: 0 !important;
+}
+.room-edit-button {
+ background: #1f3b57 !important;
+}
+.room-delete-button {
+ background: #a82626 !important;
+}
+#raumSuche {
+ margin-bottom: 10px;
+}
+@media (max-width: 760px) {
+ .room-item {
+  flex-direction: column !important;
+  align-items: stretch !important;
+ }
+ .room-item-actions {
+  width: 100% !important;
+ }
+ .room-item-actions button {
+  flex: 1 !important;
+ }
+}
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -353,8 +424,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.7.1 Status</h1>
-<p>Foto-Manager mit Status-System</p>
+<h1>SchulManager – Hausmeisterportal v1.7.2 Raumliste</h1>
+<p>Foto-Manager mit Status-System und Raumliste</p>
 </header>
 
 <main>
@@ -412,6 +483,9 @@ th { background:#e8edf3; }
    <button class="success" onclick="raumHinzufuegen()">Raum hinzufügen</button>
   </div>
 
+  <label>Räume suchen</label>
+  <input type="text" id="raumSuche" placeholder="Raum suchen..." oninput="raeumeAktualisieren()">
+
   <div id="raumListe"></div>
  </div>
 </div>
@@ -420,7 +494,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.7.1:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.7.2:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -510,7 +584,7 @@ th { background:#e8edf3; }
 <section class="card no-print">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.7.1</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.7.2</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -696,6 +770,7 @@ function alleRaeumeAlsListe() {
 
 function raeumeAktualisieren() {
  const daten = raeumeLaden();
+ const raumFilter = document.getElementById("raumSuche") ? document.getElementById("raumSuche").value.toLowerCase().trim() : "";
 
  const verwaltungKategorie = document.getElementById("raumKategorie");
  if (verwaltungKategorie) {
@@ -772,7 +847,9 @@ function raeumeAktualisieren() {
     content.classList.toggle("collapsed");
    };
 
-   (daten[kategorie] || []).forEach(raum => {
+   (daten[kategorie] || [])
+    .filter(raum => !raumFilter || raum.toLowerCase().includes(raumFilter))
+    .forEach(raum => {
     const item = document.createElement("div");
     item.className = "room-item";
 
@@ -791,6 +868,7 @@ function raeumeAktualisieren() {
 
     const btn = document.createElement("button");
     btn.textContent = "Entfernen";
+    btn.className = "room-delete-button";
     btn.onclick = function() {
      raumEntfernen(kategorie, raum);
     };
@@ -1302,7 +1380,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.7.1-status",
+  version: "schulmanager-v1.7.2-raumliste",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1418,7 +1496,7 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.7.1";
+const APP_VERSION = "1.7.2";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");
