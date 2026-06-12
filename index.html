@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.6.2 Raumkategorien</title>
+<title>SchulManager – Hausmeisterportal v1.6.3 Raum bearbeiten</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -286,6 +286,26 @@ th { background:#e8edf3; }
  .room-item button { width: auto; min-height: auto; }
 }
 
+
+.room-edit-button {
+ background: #1f3b57 !important;
+}
+.room-item-actions {
+ display: flex;
+ gap: 6px;
+ flex-wrap: nowrap;
+}
+.room-item-actions button {
+ width: auto;
+ min-height: auto;
+}
+@media (max-width: 760px) {
+ .room-item-actions button {
+  width: auto;
+  min-height: auto;
+ }
+}
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -320,8 +340,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.6.2 Raumkategorien</h1>
-<p>Foto-Manager mit Raumkategorien</p>
+<h1>SchulManager – Hausmeisterportal v1.6.3 Raum bearbeiten</h1>
+<p>Foto-Manager mit Raumkategorien und Bearbeiten</p>
 </header>
 
 <main>
@@ -384,7 +404,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.6.2:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.6.3:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -467,7 +487,7 @@ th { background:#e8edf3; }
 <section class="card no-print">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.6.2</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.6.3</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -726,15 +746,30 @@ function raeumeAktualisieren() {
    (daten[kategorie] || []).forEach(raum => {
     const item = document.createElement("div");
     item.className = "room-item";
+
     const span = document.createElement("span");
     span.textContent = raum;
+
+    const actions = document.createElement("div");
+    actions.className = "room-item-actions";
+
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Bearbeiten";
+    editBtn.className = "room-edit-button";
+    editBtn.onclick = function() {
+     raumBearbeiten(kategorie, raum);
+    };
+
     const btn = document.createElement("button");
     btn.textContent = "Entfernen";
     btn.onclick = function() {
      raumEntfernen(kategorie, raum);
     };
+
+    actions.appendChild(editBtn);
+    actions.appendChild(btn);
     item.appendChild(span);
-    item.appendChild(btn);
+    item.appendChild(actions);
     content.appendChild(item);
    });
 
@@ -778,6 +813,37 @@ window.raumHinzufuegen = function() {
  daten[kategorie].sort((a,b) => a.localeCompare(b, "de"));
  raeumeSpeichern(daten);
  input.value = "";
+ raeumeAktualisieren();
+};
+
+window.raumBearbeiten = function(kategorie, raum) {
+ const neuerName = prompt("Raum bearbeiten:", raum);
+ if (neuerName === null) return;
+
+ const bereinigt = neuerName.trim();
+ if (!bereinigt) {
+  alert("Der Raumname darf nicht leer sein.");
+  return;
+ }
+
+ const daten = raeumeLaden();
+ const bereitsVorhanden = Object.values(daten).some(liste => liste.includes(bereinigt));
+
+ if (bereitsVorhanden && bereinigt !== raum) {
+  alert("Dieser Raumname ist bereits vorhanden.");
+  return;
+ }
+
+ daten[kategorie] = (daten[kategorie] || []).map(r => r === raum ? bereinigt : r);
+ daten[kategorie].sort((a,b) => a.localeCompare(b, "de"));
+ raeumeSpeichern(daten);
+
+ // Hinweis: Bestehende Meldungen behalten ihren alten Ortstext.
+ // Neue Meldungen nutzen ab jetzt den geänderten Raumnamen.
+ if (document.getElementById("ort").value === raum) {
+  document.getElementById("ort").value = bereinigt;
+ }
+
  raeumeAktualisieren();
 };
 
@@ -1186,7 +1252,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.6.2-raumkategorien-hotfix",
+  version: "schulmanager-v1.6.3-raum-bearbeiten",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1302,7 +1368,7 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.6.2";
+const APP_VERSION = "1.6.3";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");
