@@ -1,15 +1,6 @@
-# SchulManager v1.6 Raumkategorien
+# SchulManager v1.5.2
 
-## Neu
-- Räume in Kategorien unterteilt
-- Kategorien:
-  - Toiletten / Sanitär
-  - Klassenräume
-  - Verwaltung
-  - Sport / Turnhalle
-  - Außenbereich
-  - Technik / Lager
-  - Sonstiges
-- Raumverwaltung bleibt im Popup
-- Kategorien sind einklappbar
-- Bei Meldungen zuerst Kategorie, dann Raum auswählen
+## Korrektur
+- Raumverwaltung-Button funktioniert jetzt.
+- Popup öffnet zuverlässig.
+- Räume hinzufügen/entfernen bleibt erhalten.

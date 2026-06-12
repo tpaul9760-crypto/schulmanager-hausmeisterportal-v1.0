@@ -1,5 +1,5 @@
 {
-  "version": "1.6",
-  "hinweis": "SchulManager v1.6 ist verfügbar.",
-  "changelog": "v1.6\n- Räume in Kategorien unterteilt\n- Kategorien: Toiletten, Klassenräume, Verwaltung, Sport, Außenbereich, Technik/Lager, Sonstiges\n- Kategorien in der Raumverwaltung einklappbar\n- Bei Meldungen zuerst Kategorie, dann Raum auswählen\n\nv1.5.2\n- Raumverwaltung-Popup korrigiert"
+  "version": "1.5.2",
+  "hinweis": "SchulManager v1.5.2 ist verfügbar.",
+  "changelog": "v1.5.2\n- Raumverwaltung-Button korrigiert\n- Popup öffnet jetzt zuverlässig\n\nv1.5.1\n- Raumverwaltung in Popup verschoben"
 }
