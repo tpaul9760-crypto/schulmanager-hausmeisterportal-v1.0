@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.7.0 Raumliste</title>
+<title>SchulManager – Hausmeisterportal v1.7.1 Status</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -307,73 +307,17 @@ th { background:#e8edf3; }
 }
 
 
-/* v1.7.0 kompakte Raumliste */
-.room-category-content {
- padding: 0 !important;
- display: block !important;
-}
-.room-category-content.collapsed {
- display: none !important;
-}
-.room-row {
- display: flex;
- justify-content: space-between;
- align-items: center;
- gap: 10px;
- padding: 9px 10px;
- border-top: 1px solid #d6dde7;
- background: #fff;
-}
-.room-row:hover {
- background: #f8fafc;
-}
-.room-name {
- flex: 1;
- min-width: 0;
- white-space: normal;
- word-break: normal;
- overflow-wrap: anywhere;
- line-height: 1.35;
-}
-.room-name::before {
- content: "•";
- color: #237a3b;
+.status-badge {
+ display: inline-block;
+ padding: 4px 8px;
+ border-radius: 999px;
  font-weight: bold;
- margin-right: 8px;
+ font-size: 12px;
+ white-space: nowrap;
 }
-.room-item-actions {
- display: flex !important;
- gap: 6px;
- flex-shrink: 0;
- flex-wrap: nowrap;
-}
-.room-item-actions button {
- width: auto !important;
- min-height: auto !important;
- padding: 6px 9px !important;
- margin: 0 !important;
-}
-.room-edit-button {
- background: #1f3b57 !important;
-}
-.room-delete-button {
- background: #a82626 !important;
-}
-#raumSuche {
- margin-bottom: 10px;
-}
-@media (max-width: 760px) {
- .room-row {
-  align-items: flex-start;
-  flex-direction: column;
- }
- .room-item-actions {
-  width: 100%;
- }
- .room-item-actions button {
-  flex: 1;
- }
-}
+.status-offen { background:#fff4cf; color:#8a5a00; border:1px solid #d9ad35; }
+.status-bearbeitung { background:#dcecff; color:#1f4e79; border:1px solid #7aa7d9; }
+.status-erledigt { background:#dff3e6; color:#237a3b; border:1px solid #7ab88a; }
 
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
@@ -409,8 +353,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.7.0 Raumliste</h1>
-<p>Foto-Manager mit kompakter Raumliste</p>
+<h1>SchulManager – Hausmeisterportal v1.7.1 Status</h1>
+<p>Foto-Manager mit Status-System</p>
 </header>
 
 <main>
@@ -422,6 +366,9 @@ th { background:#e8edf3; }
 <div class="stat">Sanitär <span id="statSanitaer">0</span></div>
 <div class="stat">Reparaturen <span id="statReparatur">0</span></div>
 <div class="stat">Reinigung <span id="statReinigung">0</span></div>
+<div class="stat">🟠 Offen <span id="statOffen">0</span></div>
+<div class="stat">🔵 In Bearbeitung <span id="statBearbeitung">0</span></div>
+<div class="stat">🟢 Erledigt <span id="statErledigt">0</span></div>
 </div>
 </section>
 
@@ -465,9 +412,6 @@ th { background:#e8edf3; }
    <button class="success" onclick="raumHinzufuegen()">Raum hinzufügen</button>
   </div>
 
-  <label>Räume suchen</label>
-  <input type="text" id="raumSuche" placeholder="Raum suchen..." oninput="raeumeAktualisieren()">
-
   <div id="raumListe"></div>
  </div>
 </div>
@@ -476,7 +420,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.7.0:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.7.1:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -506,6 +450,13 @@ th { background:#e8edf3; }
 
 <label>Uhrzeit</label>
 <input type="time" id="uhrzeit">
+
+<label>Status</label>
+<select id="status">
+<option>🟠 Offen</option>
+<option>🔵 In Bearbeitung</option>
+<option>🟢 Erledigt</option>
+</select>
 
 <label>Raum-Kategorie auswählen</label>
 <select id="meldungRaumKategorie" onchange="meldungRaumKategorieGeaendert()">
@@ -559,7 +510,7 @@ th { background:#e8edf3; }
 <section class="card no-print">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.7.0</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.7.1</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -576,6 +527,12 @@ th { background:#e8edf3; }
 <h2>Suche / Filter / Ausgabe</h2>
 <div class="toolbar">
 <input style="max-width:260px" type="text" id="suche" placeholder="Suche..." oninput="anzeigen()">
+<select style="max-width:180px" id="filterStatus" onchange="anzeigen()">
+<option>Alle Status</option>
+<option>🟠 Offen</option>
+<option>🔵 In Bearbeitung</option>
+<option>🟢 Erledigt</option>
+</select>
 <select style="max-width:220px" id="filterBereich" onchange="anzeigen()">
 <option>Alle Bereiche</option>
 <option>🚻 Toiletten / Sanitär</option>
@@ -602,7 +559,7 @@ th { background:#e8edf3; }
 <table>
 <thead>
 <tr>
-<th>Nr.</th><th>Datum</th><th>Bereich</th><th>Ort</th><th>Meldung</th><th>Maßnahme / Notiz</th><th>Personen</th><th>Fotos</th><th class="no-print">Aktion</th>
+<th>Nr.</th><th>Status</th><th>Datum</th><th>Bereich</th><th>Ort</th><th>Meldung</th><th>Maßnahme / Notiz</th><th>Personen</th><th>Fotos</th><th class="no-print">Aktion</th>
 </tr>
 </thead>
 <tbody id="liste"></tbody>
@@ -739,7 +696,6 @@ function alleRaeumeAlsListe() {
 
 function raeumeAktualisieren() {
  const daten = raeumeLaden();
- const raumFilter = document.getElementById("raumSuche") ? document.getElementById("raumSuche").value.toLowerCase().trim() : "";
 
  const verwaltungKategorie = document.getElementById("raumKategorie");
  if (verwaltungKategorie) {
@@ -816,31 +772,25 @@ function raeumeAktualisieren() {
     content.classList.toggle("collapsed");
    };
 
-   (daten[kategorie] || [])
-    .filter(raum => !raumFilter || raum.toLowerCase().includes(raumFilter))
-    .forEach(raum => {
+   (daten[kategorie] || []).forEach(raum => {
     const item = document.createElement("div");
-    item.className = "room-row";
+    item.className = "room-item";
 
     const span = document.createElement("span");
     span.textContent = raum;
-    span.className = "room-name";
 
     const actions = document.createElement("div");
     actions.className = "room-item-actions";
 
     const editBtn = document.createElement("button");
-    editBtn.textContent = "✏️";
-    editBtn.title = "Raum bearbeiten";
+    editBtn.textContent = "Bearbeiten";
     editBtn.className = "room-edit-button";
     editBtn.onclick = function() {
      raumBearbeiten(kategorie, raum);
     };
 
     const btn = document.createElement("button");
-    btn.textContent = "🗑";
-    btn.title = "Raum entfernen";
-    btn.className = "room-delete-button";
+    btn.textContent = "Entfernen";
     btn.onclick = function() {
      raumEntfernen(kategorie, raum);
     };
@@ -863,7 +813,6 @@ window.meldungRaumKategorieGeaendert = function() {
  const raumSelect = document.getElementById("raumAuswahl");
  if (raumSelect) raumSelect.value = "";
  raeumeAktualisieren();
- document.getElementById("status").value = e.status || "🟠 Offen";
 };
 
 window.raumAuswahlGeaendert = function() {
@@ -1188,7 +1137,8 @@ window.speichern = async function() {
   gemeldetVon: document.getElementById("gemeldetVon").value.trim(),
   bearbeitetVon: document.getElementById("bearbeitetVon").value.trim(),
   fotos: fotosAktuell,
-  status: document.getElementById("status").value, zuletztGeaendert: new Date().toLocaleString("de-DE")
+  status: document.getElementById("status").value,
+  zuletztGeaendert: new Date().toLocaleString("de-DE")
  };
 
  if (!eintrag.datum || !eintrag.ort || !eintrag.titel) {
@@ -1225,6 +1175,7 @@ window.bearbeiten = function(id) {
  ["datum","uhrzeit","ort","beschreibung","massnahme","gemeldetVon","bearbeitetVon"].forEach(k => {
   document.getElementById(k).value = e[k] || "";
  });
+ if (document.getElementById("status")) document.getElementById("status").value = e.status || "🟠 Offen";
  raeumeAktualisieren();
 
  fotosAktuell = e.fotos || [];
@@ -1262,17 +1213,30 @@ function formularLeeren() {
  document.getElementById("formularTitel").textContent = "Neue Meldung erfassen";
 if (document.getElementById("meldungRaumKategorie")) document.getElementById("meldungRaumKategorie").value = "";
 if (document.getElementById("raumAuswahl")) document.getElementById("raumAuswahl").value = "";
-document.getElementById("status").value="🟠 Offen";
+if (document.getElementById("status")) document.getElementById("status").value = "🟠 Offen";
 heuteSetzen();
  schadenAuswahlAktualisieren();
+}
+
+
+function statusKlasse(status) {
+ if ((status || "").includes("Erledigt")) return "status-erledigt";
+ if ((status || "").includes("Bearbeitung")) return "status-bearbeitung";
+ return "status-offen";
+}
+
+function statusText(status) {
+ return status || "🟠 Offen";
 }
 
 window.anzeigen = function() {
  const suche = document.getElementById("suche").value.toLowerCase();
  const fb = document.getElementById("filterBereich").value;
+ const fs = document.getElementById("filterStatus") ? document.getElementById("filterStatus").value : "Alle Status";
 
  let liste = [...eintraege];
  if (fb !== "Alle Bereiche") liste = liste.filter(e => e.bereichTyp === fb);
+ if (fs !== "Alle Status") liste = liste.filter(e => (e.status || "🟠 Offen") === fs);
  if (suche) liste = liste.filter(e => JSON.stringify(e).toLowerCase().includes(suche));
 
  document.getElementById("anzahl").textContent = "Anzahl Meldungen: " + liste.length;
@@ -1287,6 +1251,7 @@ window.anzeigen = function() {
   const tr = document.createElement("tr");
   tr.innerHTML = `
    <td>${nummer}</td>
+   <td><span class="status-badge ${statusKlasse(e.status)}">${escapeHtml(statusText(e.status))}</span></td>
    <td>${escapeHtml(e.datum || "")}<br>${escapeHtml(e.uhrzeit || "")}</td>
    <td>${escapeHtml(e.bereichTyp || "")}</td>
    <td>${escapeHtml(e.ort || "")}</td>
@@ -1305,6 +1270,7 @@ window.anzeigen = function() {
    card.className = "mobile-entry-card";
    card.innerHTML = `
     <h3>${nummer} – ${escapeHtml(e.titel || "")}</h3>
+    <div class="mobile-row"><span class="status-badge ${statusKlasse(e.status)}">${escapeHtml(statusText(e.status))}</span></div>
     <div class="mobile-row"><b>Datum:</b> ${escapeHtml(e.datum || "")} ${escapeHtml(e.uhrzeit || "")}</div>
     <div class="mobile-row"><b>Bereich:</b> ${escapeHtml(e.bereichTyp || "")}</div>
     <div class="mobile-row"><b>Ort:</b> ${escapeHtml(e.ort || "")}</div>
@@ -1329,11 +1295,14 @@ function dashboard() {
  document.getElementById("statSanitaer").textContent = eintraege.filter(x => (x.bereichTyp || "").includes("Sanitär")).length;
  document.getElementById("statReparatur").textContent = eintraege.filter(x => (x.bereichTyp || "").includes("Reparatur")).length;
  document.getElementById("statReinigung").textContent = eintraege.filter(x => (x.bereichTyp || "").includes("Reinigung")).length;
+ if (document.getElementById("statOffen")) document.getElementById("statOffen").textContent = eintraege.filter(x => (x.status || "🟠 Offen") === "🟠 Offen").length;
+ if (document.getElementById("statBearbeitung")) document.getElementById("statBearbeitung").textContent = eintraege.filter(x => (x.status || "") === "🔵 In Bearbeitung").length;
+ if (document.getElementById("statErledigt")) document.getElementById("statErledigt").textContent = eintraege.filter(x => (x.status || "") === "🟢 Erledigt").length;
 }
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.7.0-raumliste",
+  version: "schulmanager-v1.7.1-status",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1449,7 +1418,7 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.6.4";
+const APP_VERSION = "1.7.1";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");

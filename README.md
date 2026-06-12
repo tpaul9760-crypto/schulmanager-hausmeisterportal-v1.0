@@ -1,3 +1,3 @@
-SchulManager v1.6.4 Raumliste
+SchulManager v1.7.1 Status sichtbar
 
-Login und Firebase unverändert. Raumverwaltung als kompakte Liste.
+Statusfeld, Filter, Übersicht und Dashboard ergänzt.
