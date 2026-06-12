@@ -1,5 +1,5 @@
 {
-  "version": "1.5",
-  "hinweis": "SchulManager v1.5 ist verfügbar.",
-  "changelog": "v1.5\n- Neuer Reiter „Räume verwalten“\n- Räume hinzufügen und entfernen\n- Raumauswahl bei neuen Meldungen\n- Freitext-Ort bleibt möglich\n\nv1.4.2\n- Galerie-Button entfernt\n- Kamera, Dateien und Drag & Drop bleiben erhalten"
+  "version": "1.5.1",
+  "hinweis": "SchulManager v1.5.1 ist verfügbar.",
+  "changelog": "v1.5.1\n- Raumverwaltung liegt jetzt in einem Popup\n- Hauptseite ist wieder kompakter\n- Räume hinzufügen/entfernen bleibt erhalten\n- Raumauswahl bei Meldungen bleibt erhalten\n\nv1.5\n- Raumverwaltung hinzugefügt"
 }

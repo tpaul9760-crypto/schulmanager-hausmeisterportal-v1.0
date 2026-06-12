@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.5 Raumverwaltung</title>
+<title>SchulManager – Hausmeisterportal v1.5.1</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -221,6 +221,71 @@ th { background:#e8edf3; }
  .room-item button { width: auto; min-height: auto; }
 }
 
+
+.room-modal {
+ display: none;
+ position: fixed;
+ z-index: 9998;
+ left: 0;
+ top: 0;
+ width: 100%;
+ height: 100%;
+ background: rgba(0,0,0,.65);
+ align-items: center;
+ justify-content: center;
+ padding: 16px;
+ box-sizing: border-box;
+}
+.room-modal-content {
+ background: white;
+ width: min(900px, 96%);
+ max-height: 88vh;
+ overflow: auto;
+ border-radius: 12px;
+ padding: 18px;
+ box-shadow: 0 4px 20px rgba(0,0,0,.35);
+}
+.room-modal-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ gap: 10px;
+ margin-bottom: 10px;
+}
+.room-modal-header h2 {
+ margin: 0;
+}
+.room-modal-close {
+ background: #a82626;
+ width: auto;
+ min-height: auto;
+ padding: 8px 12px;
+}
+.room-quickbar {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ gap: 10px;
+ flex-wrap: wrap;
+}
+@media (max-width: 760px) {
+ .room-modal-content {
+  width: 96%;
+  max-height: 90vh;
+  padding: 14px;
+ }
+ .room-modal-header {
+  display: block;
+ }
+ .room-modal-close {
+  width: 100%;
+  margin-top: 8px;
+ }
+ .room-quickbar {
+  display: block;
+ }
+}
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -255,8 +320,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.5 Raumverwaltung</h1>
-<p>Foto-Manager mit Raumverwaltung</p>
+<h1>SchulManager – Hausmeisterportal v1.5.1</h1>
+<p>Foto-Manager mit Raumverwaltung im Popup</p>
 </header>
 
 <main>
@@ -272,27 +337,43 @@ th { background:#e8edf3; }
 </section>
 
 <section class="card no-print">
-<h2>🏫 Räume verwalten</h2>
-<div class="notice small">
-Hier kannst du Räume, Toilettenbereiche, Schulhofbereiche oder Gebäudeabschnitte anlegen. Danach erscheinen sie bei jeder Meldung in der Raumauswahl.
-</div>
-
-<div class="room-controls">
+<div class="room-quickbar">
  <div>
-  <label>Neuen Raum / Bereich hinzufügen</label>
-  <input type="text" id="neuerRaum" placeholder="z. B. R107, Jungentoilette EG, Turnhalle, Schulhof">
+  <h2 style="margin-bottom:6px;">🏫 Räume</h2>
+  <p class="small" style="margin-top:0;">Räume verwalten oder bei Meldungen auswählen.</p>
  </div>
- <button class="success" onclick="raumHinzufuegen()">Raum hinzufügen</button>
+ <button onclick="raeumePopupOeffnen()">🏫 Räume verwalten</button>
 </div>
-
-<div id="raumListe" class="room-list"></div>
 </section>
+
+<div id="raumModal" class="room-modal no-print" onclick="raeumePopupHintergrundSchliessen(event)">
+ <div class="room-modal-content">
+  <div class="room-modal-header">
+   <h2>🏫 Räume verwalten</h2>
+   <button class="room-modal-close" onclick="raeumePopupSchliessen()">Schließen</button>
+  </div>
+
+  <div class="notice small">
+  Hier kannst du Räume, Toilettenbereiche, Schulhofbereiche oder Gebäudeabschnitte anlegen. Danach erscheinen sie bei jeder Meldung in der Raumauswahl.
+  </div>
+
+  <div class="room-controls">
+   <div>
+    <label>Neuen Raum / Bereich hinzufügen</label>
+    <input type="text" id="neuerRaum" placeholder="z. B. R107, Jungentoilette EG, Turnhalle, Schulhof">
+   </div>
+   <button class="success" onclick="raumHinzufuegen()">Raum hinzufügen</button>
+  </div>
+
+  <div id="raumListe" class="room-list"></div>
+ </div>
+</div>
 
 <section class="card no-print">
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.5:</b> Meldungen werden über Firebase synchronisiert. Räume können jetzt verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.5.1:</b> Meldungen werden über Firebase synchronisiert. Räume können jetzt verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -370,7 +451,7 @@ Hier kannst du Räume, Toilettenbereiche, Schulhofbereiche oder Gebäudeabschnit
 <section class="card no-print">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.5</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.5.1</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -963,7 +1044,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.5-raumverwaltung",
+  version: "schulmanager-v1.5.1-raumverwaltung-popup",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1061,6 +1142,14 @@ window.modalHintergrundSchliessen = function(event) {
 
 document.addEventListener("keydown", function(event) {
  const modalOffen = document.getElementById("photoModal").style.display === "flex";
+ const raumModal = document.getElementById("raumModal");
+ const raumModalOffen = raumModal && raumModal.style.display === "flex";
+
+ if (event.key === "Escape" && raumModalOffen) {
+  raeumePopupSchliessen();
+  return;
+ }
+
  if (!modalOffen) return;
 
  if (event.key === "Escape") fotoSchliessen();
@@ -1079,7 +1168,7 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.5";
+const APP_VERSION = "1.5.1";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");
