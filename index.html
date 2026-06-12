@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.5.2</title>
+<title>SchulManager – Hausmeisterportal v1.6.1 Raumkategorien</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -286,6 +286,33 @@ th { background:#e8edf3; }
  }
 }
 
+
+.room-category-block {
+ background: #f8fafc;
+ border: 1px solid #d6dde7;
+ border-radius: 8px;
+ margin-top: 10px;
+ overflow: hidden;
+}
+.room-category-header {
+ padding: 10px 12px;
+ font-weight: bold;
+ cursor: pointer;
+ background: #e8edf3;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+}
+.room-category-content {
+ padding: 8px;
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+ gap: 8px;
+}
+.room-category-content.collapsed {
+ display: none;
+}
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -320,8 +347,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.5.2</h1>
-<p>Foto-Manager mit korrigierter Raumverwaltung</p>
+<h1>SchulManager – Hausmeisterportal v1.6.1 Raumkategorien</h1>
+<p>Foto-Manager mit Raumkategorien</p>
 </header>
 
 <main>
@@ -340,7 +367,7 @@ th { background:#e8edf3; }
 <div class="room-quickbar">
  <div>
   <h2 style="margin-bottom:6px;">🏫 Räume</h2>
-  <p class="small" style="margin-top:0;">Räume verwalten oder bei Meldungen auswählen.</p>
+  <p class="small" style="margin-top:0;">Räume nach Kategorien verwalten oder bei Meldungen auswählen.</p>
  </div>
  <button id="raumverwaltungButton" type="button">🏫 Räume verwalten</button>
 </div>
@@ -359,6 +386,17 @@ th { background:#e8edf3; }
 
   <div class="room-controls">
    <div>
+    <label>Kategorie</label>
+    <select id="raumKategorie">
+     <option>🚻 Toiletten / Sanitär</option>
+     <option>🧑‍🏫 Klassenräume</option>
+     <option>🏢 Verwaltung</option>
+     <option>🏟 Sport / Turnhalle</option>
+     <option>🌳 Außenbereich</option>
+     <option>🔧 Technik / Lager</option>
+     <option>📦 Sonstiges</option>
+    </select>
+
     <label>Neuen Raum / Bereich hinzufügen</label>
     <input type="text" id="neuerRaum" placeholder="z. B. R107, Jungentoilette EG, Turnhalle, Schulhof">
    </div>
@@ -373,7 +411,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.5.2:</b> Meldungen werden über Firebase synchronisiert. Räume können jetzt verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.6.1:</b> Meldungen werden über Firebase synchronisiert. Räume können jetzt in Kategorien verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -403,6 +441,11 @@ th { background:#e8edf3; }
 
 <label>Uhrzeit</label>
 <input type="time" id="uhrzeit">
+
+<label>Raum-Kategorie auswählen</label>
+<select id="meldungRaumKategorie" onchange="meldungRaumKategorieGeaendert()">
+<option value="">-- Kategorie auswählen --</option>
+</select>
 
 <label>Raum auswählen</label>
 <select id="raumAuswahl" onchange="raumAuswahlGeaendert()">
@@ -451,7 +494,7 @@ th { background:#e8edf3; }
 <section class="card no-print">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.5.2</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.6.1</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -589,59 +632,207 @@ let bearbeitungsId = null;
 let aktuelleGalerie = [];
 let aktuellesFotoIndex = 0;
 
-const RAUM_KEY = "schulmanagerRaeume";
-const standardRaeume = [
- "Jungentoilette EG",
- "Mädchentoilette EG",
- "Jungentoilette OG",
- "Mädchentoilette OG",
- "Lehrertoilette",
- "Sekretariat",
- "Lehrerzimmer",
- "Mensa",
- "Turnhalle",
- "Schulhof",
- "Technikraum"
+const RAUM_KEY = "schulmanagerRaeumeKategorisiert";
+const alteRAUM_KEY = "schulmanagerRaeume";
+
+const raumKategorien = [
+ "🚻 Toiletten / Sanitär",
+ "🧑‍🏫 Klassenräume",
+ "🏢 Verwaltung",
+ "🏟 Sport / Turnhalle",
+ "🌳 Außenbereich",
+ "🔧 Technik / Lager",
+ "📦 Sonstiges"
 ];
+
+const standardRaeumeKategorisiert = {
+ "🚻 Toiletten / Sanitär": [
+  "Jungentoilette EG",
+  "Mädchentoilette EG",
+  "Jungentoilette OG",
+  "Mädchentoilette OG",
+  "Lehrertoilette"
+ ],
+ "🧑‍🏫 Klassenräume": [
+  "R101",
+  "R102",
+  "R103",
+  "R104",
+  "R105"
+ ],
+ "🏢 Verwaltung": [
+  "Sekretariat",
+  "Schulleitung",
+  "Lehrerzimmer"
+ ],
+ "🏟 Sport / Turnhalle": [
+  "Turnhalle",
+  "Geräteraum Sport",
+  "Umkleide Jungen",
+  "Umkleide Mädchen"
+ ],
+ "🌳 Außenbereich": [
+  "Schulhof",
+  "Parkplatz",
+  "Fahrradständer",
+  "Eingangsbereich"
+ ],
+ "🔧 Technik / Lager": [
+  "Technikraum",
+  "Heizungsraum",
+  "Materiallager",
+  "Hausmeisterraum"
+ ],
+ "📦 Sonstiges": [
+  "Sonstiger Bereich"
+ ]
+};
 
 function raeumeLaden() {
  const gespeichert = localStorage.getItem(RAUM_KEY);
  if (gespeichert) return JSON.parse(gespeichert);
- localStorage.setItem(RAUM_KEY, JSON.stringify(standardRaeume));
- return [...standardRaeume];
+
+ // Migration aus alter Raumliste ohne Kategorien
+ const alteRaeume = localStorage.getItem(alteRAUM_KEY);
+ if (alteRaeume) {
+  try {
+   const liste = JSON.parse(alteRaeume);
+   const daten = JSON.parse(JSON.stringify(standardRaeumeKategorisiert));
+   liste.forEach(raum => {
+    const bereitsVorhanden = Object.values(daten).some(arr => arr.includes(raum));
+    if (!bereitsVorhanden) daten["📦 Sonstiges"].push(raum);
+   });
+   localStorage.setItem(RAUM_KEY, JSON.stringify(daten));
+   return daten;
+  } catch (e) {}
+ }
+
+ localStorage.setItem(RAUM_KEY, JSON.stringify(standardRaeumeKategorisiert));
+ return JSON.parse(JSON.stringify(standardRaeumeKategorisiert));
 }
 
 function raeumeSpeichern(raeume) {
  localStorage.setItem(RAUM_KEY, JSON.stringify(raeume));
 }
 
+function alleRaeumeAlsListe() {
+ const daten = raeumeLaden();
+ return Object.values(daten).flat();
+}
+
+function kategorienSelectsAktualisieren() {
+ const daten = raeumeLaden();
+
+ const verwaltungKategorie = document.getElementById("raumKategorie");
+ if (verwaltungKategorie) {
+  verwaltungKategorie.innerHTML = "";
+  raumKategorien.forEach(kategorie => {
+   const option = document.createElement("option");
+   option.value = kategorie;
+   option.textContent = kategorie;
+   verwaltungKategorie.appendChild(option);
+  });
+ }
+
+ const meldungKategorie = document.getElementById("meldungRaumKategorie");
+ if (meldungKategorie) {
+  const alt = meldungKategorie.value;
+  meldungKategorie.innerHTML = '<option value="">-- Kategorie auswählen --</option>';
+  raumKategorien.forEach(kategorie => {
+   const option = document.createElement("option");
+   option.value = kategorie;
+   option.textContent = kategorie + " (" + ((daten[kategorie] || []).length) + ")";
+   meldungKategorie.appendChild(option);
+  });
+  if (alt) meldungKategorie.value = alt;
+ }
+}
+
 function raeumeAktualisieren() {
- const raeume = raeumeLaden();
+ const daten = raeumeLaden();
+ kategorienSelectsAktualisieren();
+
+ const ortWert = document.getElementById("ort") ? document.getElementById("ort").value : "";
+ const meldungKategorie = document.getElementById("meldungRaumKategorie");
  const select = document.getElementById("raumAuswahl");
  const liste = document.getElementById("raumListe");
 
- if (select) {
-  const aktuellerOrt = document.getElementById("ort") ? document.getElementById("ort").value : "";
+ if (meldungKategorie && select) {
+  let kategorie = meldungKategorie.value;
+
+  if (!kategorie && ortWert) {
+   for (const kat of raumKategorien) {
+    if ((daten[kat] || []).includes(ortWert)) {
+     kategorie = kat;
+     meldungKategorie.value = kat;
+     break;
+    }
+   }
+  }
+
   select.innerHTML = '<option value="">-- Raum auswählen --</option>';
-  raeume.forEach(raum => {
-   const option = document.createElement("option");
-   option.value = raum;
-   option.textContent = raum;
-   select.appendChild(option);
-  });
-  if (aktuellerOrt && raeume.includes(aktuellerOrt)) select.value = aktuellerOrt;
+
+  if (kategorie) {
+   (daten[kategorie] || []).forEach(raum => {
+    const option = document.createElement("option");
+    option.value = raum;
+    option.textContent = raum;
+    select.appendChild(option);
+   });
+  } else {
+   raumKategorien.forEach(kat => {
+    const gruppe = document.createElement("optgroup");
+    gruppe.label = kat;
+    (daten[kat] || []).forEach(raum => {
+     const option = document.createElement("option");
+     option.value = raum;
+     option.textContent = raum;
+     gruppe.appendChild(option);
+    });
+    select.appendChild(gruppe);
+   });
+  }
+
+  if (ortWert && alleRaeumeAlsListe().includes(ortWert)) {
+   select.value = ortWert;
+  }
  }
 
  if (liste) {
   liste.innerHTML = "";
-  raeume.forEach(raum => {
-   const item = document.createElement("div");
-   item.className = "room-item";
-   item.innerHTML = `<span>${escapeHtml(raum)}</span><button onclick="raumEntfernen('${escapeJs(raum)}')">Entfernen</button>`;
-   liste.appendChild(item);
+  raumKategorien.forEach(kategorie => {
+   const block = document.createElement("div");
+   block.className = "room-category-block";
+
+   const header = document.createElement("div");
+   header.className = "room-category-header";
+   header.innerHTML = `<span>${escapeHtml(kategorie)}</span><span>${(daten[kategorie] || []).length}</span>`;
+   header.onclick = function() {
+    content.classList.toggle("collapsed");
+   };
+
+   const content = document.createElement("div");
+   content.className = "room-category-content";
+
+   (daten[kategorie] || []).forEach(raum => {
+    const item = document.createElement("div");
+    item.className = "room-item";
+    item.innerHTML = `<span>${escapeHtml(raum)}</span><button onclick="raumEntfernen('${escapeJs(kategorie)}','${escapeJs(raum)}')">Entfernen</button>`;
+    content.appendChild(item);
+   });
+
+   block.appendChild(header);
+   block.appendChild(content);
+   liste.appendChild(block);
   });
  }
 }
+
+window.meldungRaumKategorieGeaendert = function() {
+ const select = document.getElementById("raumAuswahl");
+ if (select) select.value = "";
+ raeumeAktualisieren();
+};
 
 window.raumAuswahlGeaendert = function() {
  const wert = document.getElementById("raumAuswahl").value;
@@ -650,29 +841,72 @@ window.raumAuswahlGeaendert = function() {
 
 window.raumHinzufuegen = function() {
  const input = document.getElementById("neuerRaum");
+ const kategorieSelect = document.getElementById("raumKategorie");
  const neuerRaum = input.value.trim();
+ const kategorie = kategorieSelect ? kategorieSelect.value : "📦 Sonstiges";
+
  if (!neuerRaum) {
   alert("Bitte einen Raum oder Bereich eintragen.");
   return;
  }
- const raeume = raeumeLaden();
- if (raeume.includes(neuerRaum)) {
+
+ const daten = raeumeLaden();
+ if (!daten[kategorie]) daten[kategorie] = [];
+
+ const bereitsVorhanden = Object.values(daten).some(arr => arr.includes(neuerRaum));
+ if (bereitsVorhanden) {
   alert("Dieser Raum ist bereits vorhanden.");
   return;
  }
- raeume.push(neuerRaum);
- raeume.sort((a,b) => a.localeCompare(b, "de"));
- raeumeSpeichern(raeume);
+
+ daten[kategorie].push(neuerRaum);
+ daten[kategorie].sort((a,b) => a.localeCompare(b, "de"));
+ raeumeSpeichern(daten);
  input.value = "";
  raeumeAktualisieren();
 };
 
-window.raumEntfernen = function(raum) {
+window.raumEntfernen = function(kategorie, raum) {
  if (!confirm("Raum wirklich entfernen? Bestehende Meldungen bleiben erhalten.")) return;
- const raeume = raeumeLaden().filter(r => r !== raum);
- raeumeSpeichern(raeume);
+ const daten = raeumeLaden();
+ daten[kategorie] = (daten[kategorie] || []).filter(r => r !== raum);
+ raeumeSpeichern(daten);
  raeumeAktualisieren();
 };
+
+window.raeumePopupOeffnen = function() {
+ if (typeof raeumeAktualisieren === "function") {
+  raeumeAktualisieren();
+ }
+ const modal = document.getElementById("raumModal");
+ if (modal) {
+  modal.style.display = "flex";
+  setTimeout(() => {
+   const input = document.getElementById("neuerRaum");
+   if (input) input.focus();
+  }, 100);
+ }
+};
+
+window.raeumePopupSchliessen = function() {
+ const modal = document.getElementById("raumModal");
+ if (modal) modal.style.display = "none";
+};
+
+window.raeumePopupHintergrundSchliessen = function(event) {
+ if (event.target && event.target.id === "raumModal") {
+  window.raeumePopupSchliessen();
+ }
+};
+
+function raumPopupInitialisieren() {
+ const btn = document.getElementById("raumverwaltungButton");
+ if (btn) {
+  btn.addEventListener("click", function() {
+   window.raeumePopupOeffnen();
+  });
+ }
+}
 
 const schadenVorlagen = {
  "🚻 Toiletten / Sanitär": [
@@ -1087,7 +1321,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.5.2-raumverwaltung-popup-fix",
+  version: "schulmanager-v1.6.1-raumkategorien-loginfix",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1211,7 +1445,7 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.5.2";
+const APP_VERSION = "1.6.1";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");

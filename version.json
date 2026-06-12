@@ -1,5 +1,5 @@
 {
-  "version": "1.5.2",
-  "hinweis": "SchulManager v1.5.2 ist verfügbar.",
-  "changelog": "v1.5.2\n- Raumverwaltung-Button korrigiert\n- Popup öffnet jetzt zuverlässig\n\nv1.5.1\n- Raumverwaltung in Popup verschoben"
+  "version": "1.6.1",
+  "hinweis": "SchulManager v1.6.1 ist verfügbar.",
+  "changelog": "v1.6.1\n- Login geprüft und korrigiert\n- Zugang bleibt: GSR-Hausmeister / GSR2026\n- Raumkategorien bleiben erhalten\n\nv1.6\n- Räume in Kategorien unterteilt"
 }

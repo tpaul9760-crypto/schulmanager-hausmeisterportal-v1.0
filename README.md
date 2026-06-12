@@ -1,6 +1,8 @@
-# SchulManager v1.5.2
+# SchulManager v1.6.1 Raumkategorien Login-Fix
 
 ## Korrektur
-- Raumverwaltung-Button funktioniert jetzt.
-- Popup öffnet zuverlässig.
-- Räume hinzufügen/entfernen bleibt erhalten.
+- Login geprüft und korrigiert
+- Benutzername: GSR-Hausmeister
+- Passwort: GSR2026
+- Raumkategorien bleiben enthalten
+- Raumverwaltung bleibt im Popup
