@@ -1,7 +1,3 @@
-# SchulManager v1.6.3 Raum bearbeiten
+SchulManager v1.6.4 Raumliste
 
-## Neu
-- Räume können jetzt bearbeitet/umbenannt werden.
-- Räume können weiterhin entfernt werden.
-- Raumkategorien bleiben erhalten.
-
+Login und Firebase unverändert. Raumverwaltung als kompakte Liste.

@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.6.3 Raum bearbeiten</title>
+<title>SchulManager – Hausmeisterportal v1.6.4 Raumliste</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -306,6 +306,75 @@ th { background:#e8edf3; }
  }
 }
 
+
+/* v1.6.4 kompakte Raumliste */
+.room-category-content {
+ padding: 0 !important;
+ display: block !important;
+}
+.room-category-content.collapsed {
+ display: none !important;
+}
+.room-row {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ gap: 10px;
+ padding: 9px 10px;
+ border-top: 1px solid #d6dde7;
+ background: #fff;
+}
+.room-row:hover {
+ background: #f8fafc;
+}
+.room-name {
+ flex: 1;
+ min-width: 0;
+ white-space: normal;
+ word-break: normal;
+ overflow-wrap: anywhere;
+ line-height: 1.35;
+}
+.room-name::before {
+ content: "•";
+ color: #237a3b;
+ font-weight: bold;
+ margin-right: 8px;
+}
+.room-item-actions {
+ display: flex !important;
+ gap: 6px;
+ flex-shrink: 0;
+ flex-wrap: nowrap;
+}
+.room-item-actions button {
+ width: auto !important;
+ min-height: auto !important;
+ padding: 6px 9px !important;
+ margin: 0 !important;
+}
+.room-edit-button {
+ background: #1f3b57 !important;
+}
+.room-delete-button {
+ background: #a82626 !important;
+}
+#raumSuche {
+ margin-bottom: 10px;
+}
+@media (max-width: 760px) {
+ .room-row {
+  align-items: flex-start;
+  flex-direction: column;
+ }
+ .room-item-actions {
+  width: 100%;
+ }
+ .room-item-actions button {
+  flex: 1;
+ }
+}
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -340,8 +409,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.6.3 Raum bearbeiten</h1>
-<p>Foto-Manager mit Raumkategorien und Bearbeiten</p>
+<h1>SchulManager – Hausmeisterportal v1.6.4 Raumliste</h1>
+<p>Foto-Manager mit kompakter Raumliste</p>
 </header>
 
 <main>
@@ -396,6 +465,9 @@ th { background:#e8edf3; }
    <button class="success" onclick="raumHinzufuegen()">Raum hinzufügen</button>
   </div>
 
+  <label>Räume suchen</label>
+  <input type="text" id="raumSuche" placeholder="Raum suchen..." oninput="raeumeAktualisieren()">
+
   <div id="raumListe"></div>
  </div>
 </div>
@@ -404,7 +476,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.6.3:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.6.4:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -487,7 +559,7 @@ th { background:#e8edf3; }
 <section class="card no-print">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.6.3</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.6.4</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -667,6 +739,7 @@ function alleRaeumeAlsListe() {
 
 function raeumeAktualisieren() {
  const daten = raeumeLaden();
+ const raumFilter = document.getElementById("raumSuche") ? document.getElementById("raumSuche").value.toLowerCase().trim() : "";
 
  const verwaltungKategorie = document.getElementById("raumKategorie");
  if (verwaltungKategorie) {
@@ -743,25 +816,31 @@ function raeumeAktualisieren() {
     content.classList.toggle("collapsed");
    };
 
-   (daten[kategorie] || []).forEach(raum => {
+   (daten[kategorie] || [])
+    .filter(raum => !raumFilter || raum.toLowerCase().includes(raumFilter))
+    .forEach(raum => {
     const item = document.createElement("div");
-    item.className = "room-item";
+    item.className = "room-row";
 
     const span = document.createElement("span");
     span.textContent = raum;
+    span.className = "room-name";
 
     const actions = document.createElement("div");
     actions.className = "room-item-actions";
 
     const editBtn = document.createElement("button");
-    editBtn.textContent = "Bearbeiten";
+    editBtn.textContent = "✏️";
+    editBtn.title = "Raum bearbeiten";
     editBtn.className = "room-edit-button";
     editBtn.onclick = function() {
      raumBearbeiten(kategorie, raum);
     };
 
     const btn = document.createElement("button");
-    btn.textContent = "Entfernen";
+    btn.textContent = "🗑";
+    btn.title = "Raum entfernen";
+    btn.className = "room-delete-button";
     btn.onclick = function() {
      raumEntfernen(kategorie, raum);
     };
@@ -1252,7 +1331,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.6.3-raum-bearbeiten",
+  version: "schulmanager-v1.6.4-raumliste",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1368,7 +1447,7 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.6.3";
+const APP_VERSION = "1.6.4";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");
