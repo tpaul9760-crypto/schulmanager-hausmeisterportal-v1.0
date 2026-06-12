@@ -1,5 +1,5 @@
 {
-  "version": "1.6.4",
-  "hinweis": "SchulManager v1.6.4 ist verfügbar.",
-  "changelog": "v1.6.4\n- Raumverwaltung auf kompakte Listenansicht umgestellt\n- Keine großen Kacheln mehr\n- Räume bleiben lesbar\n- Suchfeld für Räume ergänzt\n- Bearbeiten/Löschen als kleine Icon-Buttons"
+  "version": "1.7.0",
+  "hinweis": "Status-System verfügbar",
+  "changelog": "Status Offen/In Bearbeitung/Erledigt"
 }
