@@ -1,5 +1,5 @@
 {
-  "version": "1.6.1",
-  "hinweis": "SchulManager v1.6.1 ist verfügbar.",
-  "changelog": "v1.6.1\n- Login geprüft und korrigiert\n- Zugang bleibt: GSR-Hausmeister / GSR2026\n- Raumkategorien bleiben erhalten\n\nv1.6\n- Räume in Kategorien unterteilt"
+  "version": "1.6.2",
+  "hinweis": "SchulManager v1.6.2 ist verfügbar.",
+  "changelog": "v1.6.2\n- Login-Hotfix\n- Benutzername nicht mehr groß-/kleinschreibungsempfindlich\n- Passwort bleibt GSR2026\n- Raumkategorien stabil neu aufgebaut\n\nv1.6\n- Raumkategorien"
 }

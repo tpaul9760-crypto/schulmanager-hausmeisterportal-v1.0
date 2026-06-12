@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.6.1 Raumkategorien</title>
+<title>SchulManager – Hausmeisterportal v1.6.2 Raumkategorien</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -187,41 +187,6 @@ th { background:#e8edf3; }
 }
 
 
-.room-list {
- display: grid;
- grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
- gap: 8px;
- margin-top: 10px;
-}
-.room-item {
- background: #e8edf3;
- border-radius: 6px;
- padding: 8px;
- display: flex;
- justify-content: space-between;
- align-items: center;
- gap: 8px;
-}
-.room-item span { word-break: break-word; }
-.room-item button {
- background: #a82626;
- padding: 6px 9px;
- margin: 0;
- min-height: auto;
- width: auto;
-}
-.room-controls {
- display: grid;
- grid-template-columns: 1fr auto;
- gap: 8px;
- align-items: end;
-}
-@media (max-width: 760px) {
- .room-controls { display: block; }
- .room-item button { width: auto; min-height: auto; }
-}
-
-
 .room-modal {
  display: none;
  position: fixed;
@@ -252,9 +217,7 @@ th { background:#e8edf3; }
  gap: 10px;
  margin-bottom: 10px;
 }
-.room-modal-header h2 {
- margin: 0;
-}
+.room-modal-header h2 { margin: 0; }
 .room-modal-close {
  background: #a82626;
  width: auto;
@@ -268,25 +231,12 @@ th { background:#e8edf3; }
  gap: 10px;
  flex-wrap: wrap;
 }
-@media (max-width: 760px) {
- .room-modal-content {
-  width: 96%;
-  max-height: 90vh;
-  padding: 14px;
- }
- .room-modal-header {
-  display: block;
- }
- .room-modal-close {
-  width: 100%;
-  margin-top: 8px;
- }
- .room-quickbar {
-  display: block;
- }
+.room-controls {
+ display: grid;
+ grid-template-columns: 1fr auto;
+ gap: 8px;
+ align-items: end;
 }
-
-
 .room-category-block {
  background: #f8fafc;
  border: 1px solid #d6dde7;
@@ -309,8 +259,31 @@ th { background:#e8edf3; }
  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
  gap: 8px;
 }
-.room-category-content.collapsed {
- display: none;
+.room-category-content.collapsed { display: none; }
+.room-item {
+ background: #e8edf3;
+ border-radius: 6px;
+ padding: 8px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ gap: 8px;
+}
+.room-item span { word-break: break-word; }
+.room-item button {
+ background: #a82626;
+ padding: 6px 9px;
+ margin: 0;
+ min-height: auto;
+ width: auto;
+}
+@media (max-width: 760px) {
+ .room-modal-content { width: 96%; max-height: 90vh; padding: 14px; }
+ .room-modal-header { display: block; }
+ .room-modal-close { width: 100%; margin-top: 8px; }
+ .room-quickbar { display: block; }
+ .room-controls { display: block; }
+ .room-item button { width: auto; min-height: auto; }
 }
 
 @media print {
@@ -347,7 +320,7 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.6.1 Raumkategorien</h1>
+<h1>SchulManager – Hausmeisterportal v1.6.2 Raumkategorien</h1>
 <p>Foto-Manager mit Raumkategorien</p>
 </header>
 
@@ -381,7 +354,7 @@ th { background:#e8edf3; }
   </div>
 
   <div class="notice small">
-  Hier kannst du Räume, Toilettenbereiche, Schulhofbereiche oder Gebäudeabschnitte anlegen. Danach erscheinen sie bei jeder Meldung in der Raumauswahl.
+  Räume werden lokal auf deinem Gerät gespeichert und erscheinen danach in der Raumauswahl.
   </div>
 
   <div class="room-controls">
@@ -403,7 +376,7 @@ th { background:#e8edf3; }
    <button class="success" onclick="raumHinzufuegen()">Raum hinzufügen</button>
   </div>
 
-  <div id="raumListe" class="room-list"></div>
+  <div id="raumListe"></div>
  </div>
 </div>
 
@@ -411,7 +384,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.6.1:</b> Meldungen werden über Firebase synchronisiert. Räume können jetzt in Kategorien verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.6.2:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -494,7 +467,7 @@ th { background:#e8edf3; }
 <section class="card no-print">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.6.1</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.6.2</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -589,10 +562,13 @@ function loginStart() {
 
 window.loginPruefen = function() {
  const user = document.getElementById("loginUser").value.trim();
- const pass = document.getElementById("loginPass").value;
+ const pass = document.getElementById("loginPass").value.trim();
  const remember = document.getElementById("loginRemember").checked;
 
- if (user === LOGIN_USER && pass === LOGIN_PASS) {
+ const userOk = user.toLowerCase() === LOGIN_USER.toLowerCase();
+ const passOk = pass === LOGIN_PASS;
+
+ if (userOk && passOk) {
   if (remember) {
    localStorage.setItem(LOGIN_KEY, "true");
   } else {
@@ -633,8 +609,6 @@ let aktuelleGalerie = [];
 let aktuellesFotoIndex = 0;
 
 const RAUM_KEY = "schulmanagerRaeumeKategorisiert";
-const alteRAUM_KEY = "schulmanagerRaeume";
-
 const raumKategorien = [
  "🚻 Toiletten / Sanitär",
  "🧑‍🏫 Klassenräume",
@@ -646,67 +620,18 @@ const raumKategorien = [
 ];
 
 const standardRaeumeKategorisiert = {
- "🚻 Toiletten / Sanitär": [
-  "Jungentoilette EG",
-  "Mädchentoilette EG",
-  "Jungentoilette OG",
-  "Mädchentoilette OG",
-  "Lehrertoilette"
- ],
- "🧑‍🏫 Klassenräume": [
-  "R101",
-  "R102",
-  "R103",
-  "R104",
-  "R105"
- ],
- "🏢 Verwaltung": [
-  "Sekretariat",
-  "Schulleitung",
-  "Lehrerzimmer"
- ],
- "🏟 Sport / Turnhalle": [
-  "Turnhalle",
-  "Geräteraum Sport",
-  "Umkleide Jungen",
-  "Umkleide Mädchen"
- ],
- "🌳 Außenbereich": [
-  "Schulhof",
-  "Parkplatz",
-  "Fahrradständer",
-  "Eingangsbereich"
- ],
- "🔧 Technik / Lager": [
-  "Technikraum",
-  "Heizungsraum",
-  "Materiallager",
-  "Hausmeisterraum"
- ],
- "📦 Sonstiges": [
-  "Sonstiger Bereich"
- ]
+ "🚻 Toiletten / Sanitär": ["Jungentoilette EG","Mädchentoilette EG","Jungentoilette OG","Mädchentoilette OG","Lehrertoilette"],
+ "🧑‍🏫 Klassenräume": ["R101","R102","R103","R104","R105"],
+ "🏢 Verwaltung": ["Sekretariat","Schulleitung","Lehrerzimmer"],
+ "🏟 Sport / Turnhalle": ["Turnhalle","Geräteraum Sport","Umkleide Jungen","Umkleide Mädchen"],
+ "🌳 Außenbereich": ["Schulhof","Parkplatz","Fahrradständer","Eingangsbereich"],
+ "🔧 Technik / Lager": ["Technikraum","Heizungsraum","Materiallager","Hausmeisterraum"],
+ "📦 Sonstiges": ["Sonstiger Bereich"]
 };
 
 function raeumeLaden() {
  const gespeichert = localStorage.getItem(RAUM_KEY);
  if (gespeichert) return JSON.parse(gespeichert);
-
- // Migration aus alter Raumliste ohne Kategorien
- const alteRaeume = localStorage.getItem(alteRAUM_KEY);
- if (alteRaeume) {
-  try {
-   const liste = JSON.parse(alteRaeume);
-   const daten = JSON.parse(JSON.stringify(standardRaeumeKategorisiert));
-   liste.forEach(raum => {
-    const bereitsVorhanden = Object.values(daten).some(arr => arr.includes(raum));
-    if (!bereitsVorhanden) daten["📦 Sonstiges"].push(raum);
-   });
-   localStorage.setItem(RAUM_KEY, JSON.stringify(daten));
-   return daten;
-  } catch (e) {}
- }
-
  localStorage.setItem(RAUM_KEY, JSON.stringify(standardRaeumeKategorisiert));
  return JSON.parse(JSON.stringify(standardRaeumeKategorisiert));
 }
@@ -720,7 +645,7 @@ function alleRaeumeAlsListe() {
  return Object.values(daten).flat();
 }
 
-function kategorienSelectsAktualisieren() {
+function raeumeAktualisieren() {
  const daten = raeumeLaden();
 
  const verwaltungKategorie = document.getElementById("raumKategorie");
@@ -735,8 +660,11 @@ function kategorienSelectsAktualisieren() {
  }
 
  const meldungKategorie = document.getElementById("meldungRaumKategorie");
+ const raumSelect = document.getElementById("raumAuswahl");
+ const ortWert = document.getElementById("ort") ? document.getElementById("ort").value : "";
+
  if (meldungKategorie) {
-  const alt = meldungKategorie.value;
+  const aktuelleKategorie = meldungKategorie.value;
   meldungKategorie.innerHTML = '<option value="">-- Kategorie auswählen --</option>';
   raumKategorien.forEach(kategorie => {
    const option = document.createElement("option");
@@ -744,60 +672,40 @@ function kategorienSelectsAktualisieren() {
    option.textContent = kategorie + " (" + ((daten[kategorie] || []).length) + ")";
    meldungKategorie.appendChild(option);
   });
-  if (alt) meldungKategorie.value = alt;
+  if (aktuelleKategorie) meldungKategorie.value = aktuelleKategorie;
  }
-}
 
-function raeumeAktualisieren() {
- const daten = raeumeLaden();
- kategorienSelectsAktualisieren();
+ if (raumSelect) {
+  const gewaehlteKategorie = meldungKategorie ? meldungKategorie.value : "";
+  raumSelect.innerHTML = '<option value="">-- Raum auswählen --</option>';
 
- const ortWert = document.getElementById("ort") ? document.getElementById("ort").value : "";
- const meldungKategorie = document.getElementById("meldungRaumKategorie");
- const select = document.getElementById("raumAuswahl");
- const liste = document.getElementById("raumListe");
-
- if (meldungKategorie && select) {
-  let kategorie = meldungKategorie.value;
-
-  if (!kategorie && ortWert) {
-   for (const kat of raumKategorien) {
-    if ((daten[kat] || []).includes(ortWert)) {
-     kategorie = kat;
-     meldungKategorie.value = kat;
-     break;
-    }
-   }
-  }
-
-  select.innerHTML = '<option value="">-- Raum auswählen --</option>';
-
-  if (kategorie) {
-   (daten[kategorie] || []).forEach(raum => {
+  if (gewaehlteKategorie) {
+   (daten[gewaehlteKategorie] || []).forEach(raum => {
     const option = document.createElement("option");
     option.value = raum;
     option.textContent = raum;
-    select.appendChild(option);
+    raumSelect.appendChild(option);
    });
   } else {
-   raumKategorien.forEach(kat => {
+   raumKategorien.forEach(kategorie => {
     const gruppe = document.createElement("optgroup");
-    gruppe.label = kat;
-    (daten[kat] || []).forEach(raum => {
+    gruppe.label = kategorie;
+    (daten[kategorie] || []).forEach(raum => {
      const option = document.createElement("option");
      option.value = raum;
      option.textContent = raum;
      gruppe.appendChild(option);
     });
-    select.appendChild(gruppe);
+    raumSelect.appendChild(gruppe);
    });
   }
 
   if (ortWert && alleRaeumeAlsListe().includes(ortWert)) {
-   select.value = ortWert;
+   raumSelect.value = ortWert;
   }
  }
 
+ const liste = document.getElementById("raumListe");
  if (liste) {
   liste.innerHTML = "";
   raumKategorien.forEach(kategorie => {
@@ -806,18 +714,27 @@ function raeumeAktualisieren() {
 
    const header = document.createElement("div");
    header.className = "room-category-header";
-   header.innerHTML = `<span>${escapeHtml(kategorie)}</span><span>${(daten[kategorie] || []).length}</span>`;
-   header.onclick = function() {
-    content.classList.toggle("collapsed");
-   };
 
    const content = document.createElement("div");
    content.className = "room-category-content";
 
+   header.innerHTML = "<span>" + escapeHtml(kategorie) + "</span><span>" + ((daten[kategorie] || []).length) + "</span>";
+   header.onclick = function() {
+    content.classList.toggle("collapsed");
+   };
+
    (daten[kategorie] || []).forEach(raum => {
     const item = document.createElement("div");
     item.className = "room-item";
-    item.innerHTML = `<span>${escapeHtml(raum)}</span><button onclick="raumEntfernen('${escapeJs(kategorie)}','${escapeJs(raum)}')">Entfernen</button>`;
+    const span = document.createElement("span");
+    span.textContent = raum;
+    const btn = document.createElement("button");
+    btn.textContent = "Entfernen";
+    btn.onclick = function() {
+     raumEntfernen(kategorie, raum);
+    };
+    item.appendChild(span);
+    item.appendChild(btn);
     content.appendChild(item);
    });
 
@@ -829,8 +746,8 @@ function raeumeAktualisieren() {
 }
 
 window.meldungRaumKategorieGeaendert = function() {
- const select = document.getElementById("raumAuswahl");
- if (select) select.value = "";
+ const raumSelect = document.getElementById("raumAuswahl");
+ if (raumSelect) raumSelect.value = "";
  raeumeAktualisieren();
 };
 
@@ -851,10 +768,8 @@ window.raumHinzufuegen = function() {
  }
 
  const daten = raeumeLaden();
- if (!daten[kategorie]) daten[kategorie] = [];
-
- const bereitsVorhanden = Object.values(daten).some(arr => arr.includes(neuerRaum));
- if (bereitsVorhanden) {
+ const vorhanden = Object.values(daten).some(liste => liste.includes(neuerRaum));
+ if (vorhanden) {
   alert("Dieser Raum ist bereits vorhanden.");
   return;
  }
@@ -875,17 +790,9 @@ window.raumEntfernen = function(kategorie, raum) {
 };
 
 window.raeumePopupOeffnen = function() {
- if (typeof raeumeAktualisieren === "function") {
-  raeumeAktualisieren();
- }
+ raeumeAktualisieren();
  const modal = document.getElementById("raumModal");
- if (modal) {
-  modal.style.display = "flex";
-  setTimeout(() => {
-   const input = document.getElementById("neuerRaum");
-   if (input) input.focus();
-  }, 100);
- }
+ if (modal) modal.style.display = "flex";
 };
 
 window.raeumePopupSchliessen = function() {
@@ -895,7 +802,7 @@ window.raeumePopupSchliessen = function() {
 
 window.raeumePopupHintergrundSchliessen = function(event) {
  if (event.target && event.target.id === "raumModal") {
-  window.raeumePopupSchliessen();
+  raeumePopupSchliessen();
  }
 };
 
@@ -903,10 +810,11 @@ function raumPopupInitialisieren() {
  const btn = document.getElementById("raumverwaltungButton");
  if (btn) {
   btn.addEventListener("click", function() {
-   window.raeumePopupOeffnen();
+   raeumePopupOeffnen();
   });
  }
 }
+
 
 const schadenVorlagen = {
  "🚻 Toiletten / Sanitär": [
@@ -1206,51 +1114,8 @@ function formularLeeren() {
  document.getElementById("speicherButton").textContent = "Meldung speichern";
  document.getElementById("abbrechenButton").classList.add("hidden");
  document.getElementById("formularTitel").textContent = "Neue Meldung erfassen";
- if (document.getElementById("raumAuswahl")) document.getElementById("raumAuswahl").value = "";
- 
-function raumPopupInitialisieren() {
- const btn = document.getElementById("raumverwaltungButton");
- if (btn) {
-  btn.addEventListener("click", function() {
-   if (typeof raeumeAktualisieren === "function") {
-    raeumeAktualisieren();
-   }
-   const modal = document.getElementById("raumModal");
-   if (modal) {
-    modal.style.display = "flex";
-   } else {
-    alert("Raumverwaltung konnte nicht geöffnet werden.");
-   }
-  });
- }
-}
-
-window.raeumePopupOeffnen = function() {
- if (typeof raeumeAktualisieren === "function") {
-  raeumeAktualisieren();
- }
- const modal = document.getElementById("raumModal");
- if (modal) {
-  modal.style.display = "flex";
-  setTimeout(() => {
-   const input = document.getElementById("neuerRaum");
-   if (input) input.focus();
-  }, 100);
- }
-};
-
-window.raeumePopupSchliessen = function() {
- const modal = document.getElementById("raumModal");
- if (modal) modal.style.display = "none";
-};
-
-window.raeumePopupHintergrundSchliessen = function(event) {
- if (event.target && event.target.id === "raumModal") {
-  window.raeumePopupSchliessen();
- }
-};
-
-loginStart();
+if (document.getElementById("meldungRaumKategorie")) document.getElementById("meldungRaumKategorie").value = "";
+if (document.getElementById("raumAuswahl")) document.getElementById("raumAuswahl").value = "";
 heuteSetzen();
  schadenAuswahlAktualisieren();
 }
@@ -1321,7 +1186,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.6.1-raumkategorien-loginfix",
+  version: "schulmanager-v1.6.2-raumkategorien-hotfix",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1419,14 +1284,6 @@ window.modalHintergrundSchliessen = function(event) {
 
 document.addEventListener("keydown", function(event) {
  const modalOffen = document.getElementById("photoModal").style.display === "flex";
- const raumModal = document.getElementById("raumModal");
- const raumModalOffen = raumModal && raumModal.style.display === "flex";
-
- if (event.key === "Escape" && raumModalOffen) {
-  raeumePopupSchliessen();
-  return;
- }
-
  if (!modalOffen) return;
 
  if (event.key === "Escape") fotoSchliessen();
@@ -1445,7 +1302,7 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.6.1";
+const APP_VERSION = "1.6.2";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");
@@ -1520,10 +1377,6 @@ window.jetztAktualisieren = async function() {
 };
 
 
-function escapeJs(text) {
- return String(text).replaceAll("\\", "\\\\").replaceAll("'", "\\'").replaceAll("\n", " ");
-}
-
 function escapeHtml(text) {
  return String(text)
   .replaceAll("&","&amp;")
@@ -1534,49 +1387,6 @@ function escapeHtml(text) {
 }
 
 document.getElementById("bereichTyp").addEventListener("change", () => schadenAuswahlAktualisieren());
-
-
-function raumPopupInitialisieren() {
- const btn = document.getElementById("raumverwaltungButton");
- if (btn) {
-  btn.addEventListener("click", function() {
-   if (typeof raeumeAktualisieren === "function") {
-    raeumeAktualisieren();
-   }
-   const modal = document.getElementById("raumModal");
-   if (modal) {
-    modal.style.display = "flex";
-   } else {
-    alert("Raumverwaltung konnte nicht geöffnet werden.");
-   }
-  });
- }
-}
-
-window.raeumePopupOeffnen = function() {
- if (typeof raeumeAktualisieren === "function") {
-  raeumeAktualisieren();
- }
- const modal = document.getElementById("raumModal");
- if (modal) {
-  modal.style.display = "flex";
-  setTimeout(() => {
-   const input = document.getElementById("neuerRaum");
-   if (input) input.focus();
-  }, 100);
- }
-};
-
-window.raeumePopupSchliessen = function() {
- const modal = document.getElementById("raumModal");
- if (modal) modal.style.display = "none";
-};
-
-window.raeumePopupHintergrundSchliessen = function(event) {
- if (event.target && event.target.id === "raumModal") {
-  window.raeumePopupSchliessen();
- }
-};
 
 loginStart();
 heuteSetzen();

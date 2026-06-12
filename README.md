@@ -1,8 +1,4 @@
-# SchulManager v1.6.1 Raumkategorien Login-Fix
+SchulManager v1.6.2 Hotfix
 
-## Korrektur
-- Login geprüft und korrigiert
-- Benutzername: GSR-Hausmeister
-- Passwort: GSR2026
-- Raumkategorien bleiben enthalten
-- Raumverwaltung bleibt im Popup
+Login und Raumkategorien korrigiert.
+Login: GSR-Hausmeister / GSR2026
