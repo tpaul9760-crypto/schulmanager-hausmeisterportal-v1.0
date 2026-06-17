@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.8.2 Kompakt Cloud</title>
+<title>SchulManager – Hausmeisterportal v1.9.0 Tab-Menü Cloud</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -381,6 +381,63 @@ th { background:#e8edf3; }
 .compact-meta{color:#555;font-size:13px}
 @media (max-width:760px){.details-toggle{width:100%;min-height:44px;margin-top:8px}.detail-grid{grid-template-columns:1fr}}
 
+
+/* v1.9.0 - Tab-Menü */
+.app-nav {
+ position: sticky;
+ top: 0;
+ z-index: 1000;
+ background: #ffffff;
+ box-shadow: 0 2px 8px rgba(0,0,0,.12);
+ padding: 10px;
+ display: flex;
+ justify-content: center;
+ gap: 8px;
+ flex-wrap: wrap;
+}
+.app-nav button {
+ background: #e8edf3;
+ color: #1f3b57;
+ font-weight: bold;
+ margin: 0;
+ min-height: auto;
+}
+.app-nav button.active {
+ background: #1f3b57;
+ color: white;
+}
+.app-tab { display: none; }
+.app-tab.active { display: block; }
+.tab-hint {
+ background:#e8edf3;
+ border-radius:8px;
+ padding:10px;
+ margin-bottom:14px;
+ color:#1f3b57;
+ font-weight:bold;
+}
+@media (max-width:760px) {
+ .app-nav {
+  position: sticky;
+  bottom: auto;
+  top: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  padding: 6px;
+ }
+ .app-nav button {
+  font-size: 12px;
+  padding: 8px 4px;
+  min-height: 42px;
+  width: 100%;
+ }
+ .app-nav .nav-text {
+  display:block;
+  font-size:11px;
+ }
+}
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -415,12 +472,20 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.8.2 Kompakt Cloud</h1>
-<p>Cloud-Version mit kompakter Klappansicht</p>
+<h1>SchulManager – Hausmeisterportal v1.9.0 Tab-Menü Cloud</h1>
+<p>Cloud-Version mit Tab-Menü und separater Meldungsübersicht</p>
 </header>
 
+<nav class="app-nav no-print">
+ <button id="tabBtn-dashboard" class="active" onclick="tabOeffnen('dashboard')">🏠 <span class="nav-text">Dashboard</span></button>
+ <button id="tabBtn-neu" onclick="tabOeffnen('neu')">➕ <span class="nav-text">Neu</span></button>
+ <button id="tabBtn-meldungen" onclick="tabOeffnen('meldungen')">📋 <span class="nav-text">Meldungen</span></button>
+ <button id="tabBtn-raeume" onclick="tabOeffnen('raeume')">🏫 <span class="nav-text">Räume</span></button>
+ <button id="tabBtn-einstellungen" onclick="tabOeffnen('einstellungen')">⚙️ <span class="nav-text">Einstellungen</span></button>
+</nav>
+
 <main>
-<section class="card">
+<section id="tab-dashboard" class="card app-tab active">
 <h2>Dashboard</h2>
 <p>Firebase-Verbindung: <span id="cloudStatus" class="offline">wird verbunden...</span></p>
 <div class="grid">
@@ -434,7 +499,8 @@ th { background:#e8edf3; }
 </div>
 </section>
 
-<section class="card no-print">
+<section id="tab-raeume" class="card no-print app-tab">
+<div class="tab-hint">🏫 Räume verwalten und organisieren</div>
 <div class="room-quickbar">
  <div>
   <h2 style="margin-bottom:6px;">🏫 Räume</h2>
@@ -481,11 +547,11 @@ th { background:#e8edf3; }
  </div>
 </div>
 
-<section class="card no-print">
+<section id="tab-neu" class="card no-print app-tab">
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.8.2:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.9.0:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -572,10 +638,10 @@ th { background:#e8edf3; }
 </section>
 
 
-<section class="card no-print">
+<section id="tab-einstellungen" class="card no-print app-tab">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.8.2</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.9.0</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -588,7 +654,9 @@ th { background:#e8edf3; }
 <p class="small">Die App prüft die Datei <b>version.json</b> auf GitHub. Wenn eine neue Version vorhanden ist, kann der Cache geleert und die App neu geladen werden.</p>
 </section>
 
-<section class="card no-print">
+<section id="tab-meldungen" class="card no-print app-tab">
+<h2>📋 Meldungen</h2>
+<div class="tab-hint">Meldungen werden erst hier angezeigt. Details und Fotos öffnen sich per Klick.</div>
 <h2>Suche / Filter / Ausgabe</h2>
 <div class="toolbar">
 <input style="max-width:260px" type="text" id="suche" placeholder="Suche..." oninput="anzeigen()">
@@ -616,9 +684,7 @@ th { background:#e8edf3; }
 <button onclick="exportJSON()">Sicherung exportieren inkl. Fotos</button>
 <label style="display:inline;font-weight:normal;"><input class="hidden" type="file" id="importDatei" accept=".json" onchange="importJSON(event)"><button onclick="document.getElementById('importDatei').click()">Sicherung importieren inkl. Fotos</button></label>
 </div>
-</section>
-
-<section class="card">
+<hr style="border:none;border-top:1px solid #d6dde7;margin:18px 0;">
 <h2>Meldungsübersicht</h2>
 <p id="anzahl"></p>
 <table>
@@ -1317,6 +1383,7 @@ window.speichern = async function() {
    alert("Meldung gespeichert.");
   }
   formularLeeren();
+  tabOeffnen('meldungen');
  } catch (error) {
   console.error(error);
   alert("Fehler beim Speichern. Prüfe bitte die Firebase-Regeln.");
@@ -1343,6 +1410,7 @@ window.bearbeiten = function(id) {
  document.getElementById("speicherButton").textContent = "Änderungen speichern";
  document.getElementById("abbrechenButton").classList.remove("hidden");
  document.getElementById("formularTitel").textContent = "Meldung bearbeiten";
+ tabOeffnen("neu");
  window.scrollTo({top:0,behavior:"smooth"});
 };
 
@@ -1493,7 +1561,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.8.2-cloud-kompakt",
+  version: "schulmanager-v1.9.0-cloud-tabs",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1609,7 +1677,7 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.8.2";
+const APP_VERSION = "1.9.0";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");
@@ -1683,6 +1751,31 @@ window.jetztAktualisieren = async function() {
  }
 };
 
+
+
+window.tabOeffnen = function(tabName) {
+ document.querySelectorAll(".app-tab").forEach(tab => tab.classList.remove("active"));
+ document.querySelectorAll(".app-nav button").forEach(btn => btn.classList.remove("active"));
+
+ const tab = document.getElementById("tab-" + tabName);
+ const btn = document.getElementById("tabBtn-" + tabName);
+
+ if (tab) tab.classList.add("active");
+ if (btn) btn.classList.add("active");
+
+ if (tabName === "meldungen") {
+  anzeigen();
+ }
+ if (tabName === "raeume") {
+  raeumeAktualisieren();
+ }
+
+ window.scrollTo({top:0, behavior:"smooth"});
+};
+
+function nachSpeichernZurueck() {
+ tabOeffnen("meldungen");
+}
 
 function escapeHtml(text) {
  return String(text)

@@ -1,5 +1,5 @@
 {
-  "version": "1.8.2",
-  "hinweis": "SchulManager Cloud v1.8.2 ist verfügbar.",
-  "changelog": "v1.8.2 Cloud\n- Meldungsübersicht kompakter\n- Details erst per Klick sichtbar\n- Fotos nur in den Details\n- Handy/Tablet deutlich aufgeräumter\n- Firebase-Struktur unverändert"
+  "version": "1.9.0",
+  "hinweis": "SchulManager Cloud v1.9.0 ist verfügbar.",
+  "changelog": "v1.9.0 Cloud\n- Neues Tab-Menü\n- Dashboard, Neue Meldung, Meldungen, Räume und Einstellungen getrennt\n- Meldungen sind nicht mehr direkt auf der Startseite sichtbar\n- Kompakte Klappansicht bleibt erhalten\n- Handy/Tablet deutlich app-ähnlicher"
 }
