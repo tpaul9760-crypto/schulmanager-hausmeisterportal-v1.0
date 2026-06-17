@@ -1,7 +1,3 @@
-# SchulManager v1.8.1 Cloud-Räume Fix
+SchulManager Cloud v1.8.2 Kompakt
 
-## Korrektur
-- Räume konnten auf manchen Geräten nicht aus Firebase geladen werden.
-- Die Firestore-Abfrage mit `orderBy("kategorie"), orderBy("name")` wurde entfernt.
-- Dadurch ist kein Composite Index mehr nötig.
-- Räume werden weiterhin über Firebase synchronisiert.
+Standardansicht zeigt nur Datum, Raum, Titel und Status. Details/Fotos erscheinen erst per Klick.

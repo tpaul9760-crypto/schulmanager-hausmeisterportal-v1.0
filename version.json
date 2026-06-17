@@ -1,5 +1,5 @@
 {
-  "version": "1.8.1",
-  "hinweis": "SchulManager v1.8.1 ist verfügbar.",
-  "changelog": "v1.8.1\n- Fehler beim Laden der Räume aus Firebase behoben\n- Firestore-Index-Abfrage entfernt\n- Räume werden ohne Composite Index geladen\n- Sortierung erfolgt weiterhin in der App\n\nv1.8.0\n- Räume über Firebase synchronisiert"
+  "version": "1.8.2",
+  "hinweis": "SchulManager Cloud v1.8.2 ist verfügbar.",
+  "changelog": "v1.8.2 Cloud\n- Meldungsübersicht kompakter\n- Details erst per Klick sichtbar\n- Fotos nur in den Details\n- Handy/Tablet deutlich aufgeräumter\n- Firebase-Struktur unverändert"
 }

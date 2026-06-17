@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.8.1 Räume Cloud Fix</title>
+<title>SchulManager – Hausmeisterportal v1.8.2 Kompakt Cloud</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -368,6 +368,19 @@ th { background:#e8edf3; }
  .room-item-actions button { flex:1; }
 }
 
+
+.compact-row{cursor:pointer;background:#fff}.compact-row:hover{background:#f8fafc}
+.details-row td{background:#f8fafc;border-top:none}
+.detail-box{padding:12px;border-left:4px solid #1f3b57;background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:10px}
+.detail-field{background:#f2f4f7;padding:8px;border-radius:6px}.detail-field b{color:#1f3b57}
+.details-toggle{background:#1f3b57;padding:6px 9px;min-height:auto;width:auto;margin:0}
+.compact-title{font-weight:bold;color:#1f3b57}.mobile-entry-card.compact{cursor:pointer}
+.mobile-entry-summary{display:grid;grid-template-columns:1fr;gap:6px}
+.mobile-entry-details{margin-top:12px;padding-top:10px;border-top:1px solid #d6dde7}
+.compact-meta{color:#555;font-size:13px}
+@media (max-width:760px){.details-toggle{width:100%;min-height:44px;margin-top:8px}.detail-grid{grid-template-columns:1fr}}
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -402,8 +415,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.8.1 Räume Cloud Fix</h1>
-<p>Foto-Manager mit Status-System und Cloud-Räumen</p>
+<h1>SchulManager – Hausmeisterportal v1.8.2 Kompakt Cloud</h1>
+<p>Cloud-Version mit kompakter Klappansicht</p>
 </header>
 
 <main>
@@ -472,7 +485,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.8.1:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.8.2:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -562,7 +575,7 @@ th { background:#e8edf3; }
 <section class="card no-print">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.8.1</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.8.2</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -611,7 +624,7 @@ th { background:#e8edf3; }
 <table>
 <thead>
 <tr>
-<th>Nr.</th><th>Status</th><th>Datum</th><th>Bereich</th><th>Ort</th><th>Meldung</th><th>Maßnahme / Notiz</th><th>Personen</th><th>Fotos</th><th class="no-print">Aktion</th>
+<th>Nr.</th><th>Status</th><th>Datum</th><th>Ort</th><th>Meldung</th><th class="no-print">Details</th>
 </tr>
 </thead>
 <tbody id="liste"></tbody>
@@ -711,6 +724,7 @@ let fotosAktuell = [];
 let bearbeitungsId = null;
 let aktuelleGalerie = [];
 let aktuellesFotoIndex = 0;
+let geoeffneteMeldungen = new Set();
 
 const RAUM_KEY = "schulmanagerRaeumeKategorisiert";
 const RAUM_MIGRATION_KEY = "schulmanagerRaeumeFirebaseMigriert";
@@ -1374,6 +1388,12 @@ function statusText(status) {
  return status || "🟠 Offen";
 }
 
+window.detailsUmschalten = function(id) {
+ if (geoeffneteMeldungen.has(id)) geoeffneteMeldungen.delete(id);
+ else geoeffneteMeldungen.add(id);
+ anzeigen();
+};
+
 window.anzeigen = function() {
  const suche = document.getElementById("suche").value.toLowerCase();
  const fb = document.getElementById("filterBereich").value;
@@ -1392,46 +1412,72 @@ window.anzeigen = function() {
 
  liste.forEach((e, index) => {
   const nummer = "M-" + String(liste.length - index).padStart(4, "0");
-  const fotosHtml = (e.fotos || []).map((src, fotoIndex) => `<img class="entry-photo" src="${src}" onclick="fotoGrossAnzeigen(\'${e.id}\', ${fotoIndex})" title="Foto groß anzeigen">`).join("");
+  const offen = geoeffneteMeldungen.has(e.id);
+  const pfeil = offen ? "▼" : "▶";
+  const fotosHtml = (e.fotos || []).map((src, fotoIndex) => `<img class="entry-photo" src="${src}" onclick="event.stopPropagation(); fotoGrossAnzeigen('${e.id}', ${fotoIndex})" title="Foto groß anzeigen">`).join("");
+
   const tr = document.createElement("tr");
+  tr.className = "compact-row";
+  tr.onclick = function(){ detailsUmschalten(e.id); };
   tr.innerHTML = `
-   <td>${nummer}</td>
+   <td>${pfeil} ${nummer}</td>
    <td><span class="status-badge ${statusKlasse(e.status)}">${escapeHtml(statusText(e.status))}</span></td>
    <td>${escapeHtml(e.datum || "")}<br>${escapeHtml(e.uhrzeit || "")}</td>
-   <td>${escapeHtml(e.bereichTyp || "")}</td>
    <td>${escapeHtml(e.ort || "")}</td>
-   <td><b>${escapeHtml(e.titel || "")}</b><br>${escapeHtml(e.beschreibung || "")}</td>
-   <td>${escapeHtml(e.massnahme || "")}<br>${e.zuletztGeaendert ? "<b>Geändert:</b> " + escapeHtml(e.zuletztGeaendert) : ""}</td>
-   <td><b>Gemeldet:</b> ${escapeHtml(e.gemeldetVon || "")}<br><b>Bearbeitet:</b> ${escapeHtml(e.bearbeitetVon || "")}</td>
-   <td>${fotosHtml}</td>
-   <td class="no-print">
-    <button onclick="bearbeiten('${e.id}')">Bearbeiten</button>
-    <button class="danger" onclick="loeschen('${e.id}')">Löschen</button>
-   </td>`;
+   <td><span class="compact-title">${escapeHtml(e.titel || "")}</span><br><span class="compact-meta">${escapeHtml(e.bereichTyp || "")}</span></td>
+   <td class="no-print"><button class="details-toggle" onclick="event.stopPropagation(); detailsUmschalten('${e.id}')">${offen ? "Details ausblenden" : "Details anzeigen"}</button></td>`;
   tbody.appendChild(tr);
+
+  if (offen) {
+   const detailTr = document.createElement("tr");
+   detailTr.className = "details-row";
+   detailTr.innerHTML = `
+    <td colspan="6">
+     <div class="detail-box">
+      <div class="detail-grid">
+       <div class="detail-field"><b>Beschreibung:</b><br>${escapeHtml(e.beschreibung || "-")}</div>
+       <div class="detail-field"><b>Maßnahme / Notiz:</b><br>${escapeHtml(e.massnahme || "-")}</div>
+       <div class="detail-field"><b>Gemeldet von:</b><br>${escapeHtml(e.gemeldetVon || "-")}</div>
+       <div class="detail-field"><b>Bearbeitet von:</b><br>${escapeHtml(e.bearbeitetVon || "-")}</div>
+       <div class="detail-field"><b>Zuletzt geändert:</b><br>${escapeHtml(e.zuletztGeaendert || "-")}</div>
+      </div>
+      <div><b>Fotos:</b><br>${fotosHtml || "<span class='small'>Keine Fotos</span>"}</div>
+      <div class="no-print" style="margin-top:10px;">
+       <button onclick="bearbeiten('${e.id}')">Bearbeiten</button>
+       <button class="danger" onclick="loeschen('${e.id}')">Löschen</button>
+      </div>
+     </div>
+    </td>`;
+   tbody.appendChild(detailTr);
+  }
 
   if (mobileListe) {
    const card = document.createElement("div");
-   card.className = "mobile-entry-card";
+   card.className = "mobile-entry-card compact";
+   card.onclick = function(){ detailsUmschalten(e.id); };
    card.innerHTML = `
-    <h3>${nummer} – ${escapeHtml(e.titel || "")}</h3>
-    <div class="mobile-row"><span class="status-badge ${statusKlasse(e.status)}">${escapeHtml(statusText(e.status))}</span></div>
-    <div class="mobile-row"><b>Datum:</b> ${escapeHtml(e.datum || "")} ${escapeHtml(e.uhrzeit || "")}</div>
-    <div class="mobile-row"><b>Bereich:</b> ${escapeHtml(e.bereichTyp || "")}</div>
-    <div class="mobile-row"><b>Ort:</b> ${escapeHtml(e.ort || "")}</div>
-    <div class="mobile-row"><b>Beschreibung:</b><br>${escapeHtml(e.beschreibung || "")}</div>
-    <div class="mobile-row"><b>Maßnahme / Notiz:</b><br>${escapeHtml(e.massnahme || "")}</div>
-    <div class="mobile-row"><b>Gemeldet:</b> ${escapeHtml(e.gemeldetVon || "")}</div>
-    <div class="mobile-row"><b>Bearbeitet:</b> ${escapeHtml(e.bearbeitetVon || "")}</div>
-    <div class="mobile-row"><b>Fotos:</b><br>${fotosHtml || "<span class='small'>Keine Fotos</span>"}</div>
-    <div class="mobile-actions no-print">
-     <button onclick="bearbeiten('${e.id}')">Bearbeiten</button>
-     <button class="danger" onclick="loeschen('${e.id}')">Löschen</button>
-    </div>`;
+    <div class="mobile-entry-summary">
+     <h3>${pfeil} ${nummer} – ${escapeHtml(e.titel || "")}</h3>
+     <div><span class="status-badge ${statusKlasse(e.status)}">${escapeHtml(statusText(e.status))}</span></div>
+     <div class="mobile-row"><b>Datum:</b> ${escapeHtml(e.datum || "")} ${escapeHtml(e.uhrzeit || "")}</div>
+     <div class="mobile-row"><b>Ort:</b> ${escapeHtml(e.ort || "")}</div>
+     <div class="mobile-row"><b>Bereich:</b> ${escapeHtml(e.bereichTyp || "")}</div>
+    </div>
+    ${offen ? `
+    <div class="mobile-entry-details">
+     <div class="mobile-row"><b>Beschreibung:</b><br>${escapeHtml(e.beschreibung || "-")}</div>
+     <div class="mobile-row"><b>Maßnahme / Notiz:</b><br>${escapeHtml(e.massnahme || "-")}</div>
+     <div class="mobile-row"><b>Gemeldet:</b> ${escapeHtml(e.gemeldetVon || "-")}</div>
+     <div class="mobile-row"><b>Bearbeitet:</b> ${escapeHtml(e.bearbeitetVon || "-")}</div>
+     <div class="mobile-row"><b>Fotos:</b><br>${fotosHtml || "<span class='small'>Keine Fotos</span>"}</div>
+     <div class="mobile-actions no-print">
+      <button onclick="event.stopPropagation(); bearbeiten('${e.id}')">Bearbeiten</button>
+      <button class="danger" onclick="event.stopPropagation(); loeschen('${e.id}')">Löschen</button>
+     </div>
+    </div>` : `<button class="details-toggle no-print" onclick="event.stopPropagation(); detailsUmschalten('${e.id}')">Details anzeigen</button>`}`;
    mobileListe.appendChild(card);
   }
  });
-
  dashboard();
 };
 
@@ -1447,7 +1493,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.8.1-cloud-raeume-fix",
+  version: "schulmanager-v1.8.2-cloud-kompakt",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1563,7 +1609,7 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.8.1";
+const APP_VERSION = "1.8.2";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");
