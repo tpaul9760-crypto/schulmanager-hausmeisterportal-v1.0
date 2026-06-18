@@ -1,3 +1,3 @@
-SchulManager Cloud v1.9.3 Kategorien
+SchulManager Cloud v1.9.4 Raum-Klappansicht
 
-Kategorienverwaltung direkt in Räume verwalten. Dateien auf GitHub ersetzen und Cache/Service Worker aktualisieren.
+Neu: Räume sind in Räume verwalten standardmäßig ausgeblendet und werden pro Kategorie aufgeklappt.

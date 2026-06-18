@@ -1,5 +1,5 @@
 {
-  "version": "1.9.3",
-  "hinweis": "SchulManager Cloud v1.9.3 ist verfügbar.",
-  "changelog": "v1.9.3 Cloud\n- Kategorienverwaltung in Räume verwalten ergänzt\n- Kategorien werden über Firebase synchronisiert\n- Neue Kategorien erscheinen bei Meldungsbereich, Filter und PDF-Bericht\n- PDF-Funktion bleibt erhalten"
+  "version": "1.9.4",
+  "hinweis": "SchulManager Cloud v1.9.4 ist verfügbar.",
+  "changelog": "v1.9.4 Cloud\n- Räume in Räume verwalten sind jetzt standardmäßig ausgeblendet\n- Klick auf Kategorie öffnet oder schließt die Raumliste\n- Buttons Alle Kategorien öffnen/schließen ergänzt\n- Kategorienverwaltung und PDF-Funktion bleiben erhalten"
 }

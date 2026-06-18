@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.9.3 Kategorien Cloud</title>
+<title>SchulManager – Hausmeisterportal v1.9.4 Räume Klappansicht Cloud</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -491,8 +491,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.9.3 Kategorien Cloud</h1>
-<p>Cloud-Version mit Tab-Menü, PDF-Bericht und dynamischen Kategorien</p>
+<h1>SchulManager – Hausmeisterportal v1.9.4 Räume Klappansicht Cloud</h1>
+<p>Cloud-Version mit Tab-Menü, PDF-Bericht, dynamischen Kategorien und Raum-Klappansicht</p>
 </header>
 
 <nav class="app-nav no-print">
@@ -575,7 +575,12 @@ th { background:#e8edf3; }
 
   <label>Räume suchen</label>
   <input type="text" id="raumSuche" placeholder="Raum suchen..." oninput="raeumeAktualisieren()">
+  <div class="toolbar" style="margin-top:8px;">
+   <button type="button" onclick="alleRaumKategorienOeffnen()">Alle Kategorien öffnen</button>
+   <button type="button" onclick="alleRaumKategorienSchliessen()">Alle Kategorien schließen</button>
+  </div>
 
+  <p class="small">Tipp: Klicke auf eine Kategorie, um die Räume ein- oder auszublenden.</p>
   <div id="raumListe"></div>
  </div>
 </div>
@@ -584,7 +589,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.9.3:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.9.4:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -674,7 +679,7 @@ th { background:#e8edf3; }
 <section id="tab-einstellungen" class="card no-print app-tab">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.9.3</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.9.4</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -852,6 +857,7 @@ let bearbeitungsId = null;
 let aktuelleGalerie = [];
 let aktuellesFotoIndex = 0;
 let geoeffneteMeldungen = new Set();
+let geoeffneteRaumKategorien = new Set();
 
 const RAUM_KEY = "schulmanagerRaeumeKategorisiert";
 const RAUM_MIGRATION_KEY = "schulmanagerRaeumeFirebaseMigriert";
@@ -1041,6 +1047,23 @@ async function lokaleRaeumeZuFirebaseMigrieren() {
  }
 }
 
+
+window.raumKategorieUmschalten = function(kategorie) {
+ if (geoeffneteRaumKategorien.has(kategorie)) geoeffneteRaumKategorien.delete(kategorie);
+ else geoeffneteRaumKategorien.add(kategorie);
+ raeumeAktualisieren();
+};
+
+window.alleRaumKategorienOeffnen = function() {
+ geoeffneteRaumKategorien = new Set(raumKategorien);
+ raeumeAktualisieren();
+};
+
+window.alleRaumKategorienSchliessen = function() {
+ geoeffneteRaumKategorien.clear();
+ raeumeAktualisieren();
+};
+
 function raeumeAktualisieren() {
  const daten = raeumeLaden();
  const raumFilter = document.getElementById("raumSuche") ? document.getElementById("raumSuche").value.toLowerCase().trim() : "";
@@ -1106,8 +1129,10 @@ function raeumeAktualisieren() {
    const content = document.createElement("div");
    content.className = "room-category-content";
 
-   header.innerHTML = "<span>" + escapeHtml(kategorie) + "</span><span>" + sichtbareRaeume.length + "</span>";
-   header.onclick = function() { content.classList.toggle("collapsed"); };
+   const istOffen = geoeffneteRaumKategorien.has(kategorie);
+   header.innerHTML = "<span>" + (istOffen ? "▼ " : "▶ ") + escapeHtml(kategorie) + "</span><span>" + sichtbareRaeume.length + "</span>";
+   header.onclick = function() { raumKategorieUmschalten(kategorie); };
+   if (!istOffen) content.classList.add("collapsed");
 
    sichtbareRaeume.forEach(raumName => {
     const raumDoc = Object.values(raeumeCloud).find(r => r.name === raumName && r.kategorie === kategorie);
@@ -1685,7 +1710,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.9.3-cloud-kategorien",
+  version: "schulmanager-v1.9.4-cloud-raum-klappansicht",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1802,7 +1827,7 @@ window.abmelden = function() {
 
 
 
-/* v1.9.3 Cloud PDF Fix */
+/* v1.9.4 Cloud PDF Fix */
 window.datumObjekt=function(wert){if(!wert)return null;const t=String(wert).split("-");if(t.length!==3)return null;return new Date(Number(t[0]),Number(t[1])-1,Number(t[2]))};
 window.datumDeutsch=function(wert){const d=datumObjekt(wert);return d?d.toLocaleDateString("de-DE"):(wert||"")};
 window.datumIso=function(d){return d.toISOString().slice(0,10)};
@@ -1824,7 +1849,7 @@ window.downloadFallback=function(blob,name){const u=URL.createObjectURL(blob);co
 window.berichtPdfErstellen=async function(){const l=berichtGefilterteEintraege();if(!l.length&&!confirm("Für diese Auswahl gibt es keine Meldungen. Trotzdem leere PDF erstellen?"))return;const mitFotos=document.getElementById("berichtMitFotos")&&document.getElementById("berichtMitFotos").checked;if(mitFotos&&l.length>20){if(!confirm("Es wurden mehr als 20 Meldungen ausgewählt. Mit Fotos kann die PDF sehr groß werden. Trotzdem fortfahren?"))return}const blob=await pdfBuilderCloud().build(l,mitFotos);const v=document.getElementById("berichtVon").value||"start",b=document.getElementById("berichtBis").value||"ende";downloadFallback(blob,`SchulManager_Bericht_${v}_bis_${b}.pdf`)};
 
 
-const APP_VERSION = "1.9.3";
+const APP_VERSION = "1.9.4";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");
