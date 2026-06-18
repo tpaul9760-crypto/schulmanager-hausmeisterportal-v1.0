@@ -1,5 +1,5 @@
 {
-  "version": "1.9.0",
-  "hinweis": "SchulManager Cloud v1.9.0 ist verfügbar.",
-  "changelog": "v1.9.0 Cloud\n- Neues Tab-Menü\n- Dashboard, Neue Meldung, Meldungen, Räume und Einstellungen getrennt\n- Meldungen sind nicht mehr direkt auf der Startseite sichtbar\n- Kompakte Klappansicht bleibt erhalten\n- Handy/Tablet deutlich app-ähnlicher"
+  "version": "1.9.1",
+  "hinweis": "SchulManager Cloud v1.9.1 ist verfügbar.",
+  "changelog": "v1.9.1 Cloud\n- Echter PDF-Bericht statt leerer Druckansicht\n- PDF-Filter nach Zeitraum, Status, Bereich und Raum\n- Optional Fotos in PDF einfügen\n- Maximal 2 Fotos pro Meldung\n- Tab-Menü bleibt erhalten"
 }
