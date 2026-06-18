@@ -1,5 +1,5 @@
 {
-  "version": "1.9.2",
-  "hinweis": "SchulManager Cloud v1.9.2 ist verfügbar.",
-  "changelog": "v1.9.2 Cloud\n- PDF-Button repariert\n- PDF-Funktionen sind jetzt global erreichbar\n- PDF-Bericht mit Filter und optionalen Fotos"
+  "version": "1.9.3",
+  "hinweis": "SchulManager Cloud v1.9.3 ist verfügbar.",
+  "changelog": "v1.9.3 Cloud\n- Kategorienverwaltung in Räume verwalten ergänzt\n- Kategorien werden über Firebase synchronisiert\n- Neue Kategorien erscheinen bei Meldungsbereich, Filter und PDF-Bericht\n- PDF-Funktion bleibt erhalten"
 }

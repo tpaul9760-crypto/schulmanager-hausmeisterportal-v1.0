@@ -1,3 +1,3 @@
-SchulManager Cloud v1.9.2 PDF Fix
+SchulManager Cloud v1.9.3 Kategorien
 
-PDF-Button repariert. Dateien auf GitHub ersetzen, danach Cache/Service Worker aktualisieren.
+Kategorienverwaltung direkt in Räume verwalten. Dateien auf GitHub ersetzen und Cache/Service Worker aktualisieren.

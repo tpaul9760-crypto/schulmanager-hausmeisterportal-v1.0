@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.9.2 PDF Fix Cloud</title>
+<title>SchulManager – Hausmeisterportal v1.9.3 Kategorien Cloud</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -448,6 +448,15 @@ th { background:#e8edf3; }
 .report-preview{background:#f8fafc;border:1px solid #d6dde7;border-radius:8px;padding:10px;margin-top:12px;max-height:180px;overflow:auto;font-size:13px;white-space:pre-line}
 @media (max-width:760px){.report-modal-content{width:96%;max-height:90vh;padding:14px}.report-modal-header{display:block}.report-modal-close{width:100%;margin-top:8px}.report-actions{display:block}.report-actions button{width:100%}}
 
+
+.category-admin-box{background:#f8fafc;border:1px solid #d6dde7;border-radius:8px;padding:12px;margin:12px 0 16px 0}
+.category-list{margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+.category-item{background:white;border:1px solid #d6dde7;border-radius:8px;padding:9px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.category-item span{flex:1;overflow-wrap:anywhere}
+.category-actions{display:flex;gap:6px;flex-shrink:0}
+.category-actions button{width:auto!important;min-height:auto!important;padding:6px 9px!important;margin:0!important}
+@media(max-width:760px){.category-item{display:block}.category-actions{margin-top:8px;width:100%}.category-actions button{flex:1}}
+
 @media print {
  header,.no-print,.card.no-print { display:none!important; }
  body { background:white; }
@@ -482,8 +491,8 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.9.2 PDF Fix Cloud</h1>
-<p>Cloud-Version mit Tab-Menü, separater Meldungsübersicht und PDF-Bericht</p>
+<h1>SchulManager – Hausmeisterportal v1.9.3 Kategorien Cloud</h1>
+<p>Cloud-Version mit Tab-Menü, PDF-Bericht und dynamischen Kategorien</p>
 </header>
 
 <nav class="app-nav no-print">
@@ -528,8 +537,22 @@ th { background:#e8edf3; }
   </div>
 
   <div class="notice small">
-  Räume werden über Firebase synchronisiert und erscheinen auf allen Geräten in der Raumauswahl.
+  Räume und Kategorien werden über Firebase synchronisiert und erscheinen auf allen Geräten in der Auswahl.
   </div>
+
+  <div class="category-admin-box">
+   <h3>📂 Kategorien verwalten</h3>
+   <p class="small">Kategorien werden über Firebase synchronisiert und erscheinen bei Meldungsbereich, Filter und PDF-Bericht.</p>
+   <div class="room-controls">
+    <div>
+     <label>Neue Kategorie hinzufügen</label>
+     <input type="text" id="neueKategorie" placeholder="z. B. 🌡️ Heizung / Klima">
+    </div>
+    <button class="success" onclick="kategorieHinzufuegen()">Kategorie hinzufügen</button>
+   </div>
+   <div id="kategorieListe" class="category-list"></div>
+  </div>
+
 
   <div class="room-controls">
    <div>
@@ -561,7 +584,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.9.2:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.9.3:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -651,7 +674,7 @@ th { background:#e8edf3; }
 <section id="tab-einstellungen" class="card no-print app-tab">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.9.2</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.9.3</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -821,6 +844,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const meldungenRef = collection(db, "meldungen");
 const raeumeRef = collection(db, "raeume");
+const kategorienRef = collection(db, "kategorien");
 
 let eintraege = [];
 let fotosAktuell = [];
@@ -835,7 +859,7 @@ const RAUM_MIGRATION_KEY = "schulmanagerRaeumeFirebaseMigriert";
 let raeumeCloud = {};
 let raeumeGeladen = false;
 
-const raumKategorien = [
+let raumKategorien = [
  "🚻 Toiletten / Sanitär",
  "🧑‍🏫 Klassenräume",
  "🏢 Verwaltung",
@@ -844,6 +868,9 @@ const raumKategorien = [
  "🔧 Technik / Lager",
  "📦 Sonstiges"
 ];
+
+let kategorienCloud = {};
+let kategorienGeladen = false;
 
 const standardRaeumeKategorisiert = {
  "🚻 Toiletten / Sanitär": ["Jungentoilette EG","Mädchentoilette EG","Jungentoilette OG","Mädchentoilette OG","Lehrertoilette"],
@@ -854,6 +881,86 @@ const standardRaeumeKategorisiert = {
  "🔧 Technik / Lager": ["Technikraum","Heizungsraum","Materiallager","Hausmeisterraum"],
  "📦 Sonstiges": ["Sonstiger Bereich"]
 };
+
+
+function alleMeldungsKategorien(){return [...raumKategorien];}
+function selectMitKategorienFuellen(select, optionAlle=false){
+ if(!select)return;
+ const alt=select.value;
+ select.innerHTML="";
+ if(optionAlle){const o=document.createElement("option");o.value="Alle Bereiche";o.textContent="Alle Bereiche";select.appendChild(o);}
+ alleMeldungsKategorien().forEach(k=>{const o=document.createElement("option");o.value=k;o.textContent=k;select.appendChild(o);});
+ if([...select.options].some(o=>o.value===alt))select.value=alt;
+}
+function meldungsKategorieSelectsAktualisieren(){
+ selectMitKategorienFuellen(document.getElementById("bereichTyp"));
+ selectMitKategorienFuellen(document.getElementById("filterBereich"),true);
+ selectMitKategorienFuellen(document.getElementById("berichtBereich"),true);
+}
+function raumKategorieSelectsAktualisieren(){
+ const daten=raeumeLaden();
+ const rk=document.getElementById("raumKategorie");
+ if(rk){const alt=rk.value;rk.innerHTML="";raumKategorien.forEach(k=>{const o=document.createElement("option");o.value=k;o.textContent=k;rk.appendChild(o)});if([...rk.options].some(o=>o.value===alt))rk.value=alt;}
+ const mk=document.getElementById("meldungRaumKategorie");
+ if(mk){const alt=mk.value;mk.innerHTML='<option value="">-- Kategorie auswählen --</option>';raumKategorien.forEach(k=>{const o=document.createElement("option");o.value=k;o.textContent=k+" ("+((daten[k]||[]).length)+")";mk.appendChild(o)});if([...mk.options].some(o=>o.value===alt))mk.value=alt;}
+}
+function kategorienListeAktualisieren(){
+ const liste=document.getElementById("kategorieListe"); if(!liste)return;
+ liste.innerHTML="";
+ if(!kategorienGeladen){const h=document.createElement("div");h.className="notice small";h.textContent="Kategorien werden aus Firebase geladen...";liste.appendChild(h);return;}
+ raumKategorien.forEach(kategorie=>{
+  const katDoc=Object.values(kategorienCloud).find(k=>k.name===kategorie);
+  const item=document.createElement("div");item.className="category-item";
+  const span=document.createElement("span");span.textContent=kategorie;
+  const actions=document.createElement("div");actions.className="category-actions";
+  const edit=document.createElement("button");edit.textContent="Bearbeiten";edit.className="room-edit-button";edit.onclick=()=>kategorieBearbeiten(katDoc?katDoc.id:null,kategorie);
+  const del=document.createElement("button");del.textContent="Löschen";del.className="danger";del.onclick=()=>kategorieEntfernen(katDoc?katDoc.id:null,kategorie);
+  actions.appendChild(edit);actions.appendChild(del);item.appendChild(span);item.appendChild(actions);liste.appendChild(item);
+ });
+}
+async function kategorieExistiert(name){const snap=await getDocs(query(kategorienRef,where("name","==",name)));return !snap.empty;}
+async function standardKategorienInFirebaseAnlegen(){
+ const snap=await getDocs(kategorienRef); if(!snap.empty)return;
+ for(const name of raumKategorien){await addDoc(kategorienRef,{name,erstelltAm:serverTimestamp(),quelle:"standard"});}
+}
+window.kategorieHinzufuegen=async function(){
+ const input=document.getElementById("neueKategorie"); const name=input.value.trim();
+ if(!name){alert("Bitte eine Kategorie eintragen.");return;}
+ if(await kategorieExistiert(name)){alert("Diese Kategorie ist bereits vorhanden.");return;}
+ try{await addDoc(kategorienRef,{name,erstelltAm:serverTimestamp(),quelle:"manuell"});input.value="";}catch(e){console.error(e);alert("Kategorie konnte nicht gespeichert werden.");}
+};
+window.kategorieBearbeiten=async function(kategorieId,alterName){
+ const neuerName=prompt("Kategorie umbenennen:",alterName); if(neuerName===null)return;
+ const name=neuerName.trim(); if(!name){alert("Der Kategoriename darf nicht leer sein.");return;}
+ if(name!==alterName && await kategorieExistiert(name)){alert("Diese Kategorie ist bereits vorhanden.");return;}
+ try{
+  if(kategorieId)await updateDoc(doc(db,"kategorien",kategorieId),{name,zuletztGeaendert:new Date().toLocaleString("de-DE")});
+  else await addDoc(kategorienRef,{name,erstelltAm:serverTimestamp(),quelle:"nachgetragen"});
+  const rs=await getDocs(query(raeumeRef,where("kategorie","==",alterName)));
+  for(const d of rs.docs){await updateDoc(doc(db,"raeume",d.id),{kategorie:name});}
+  alert("Kategorie geändert. Räume wurden übernommen. Bestehende Meldungen bleiben unverändert.");
+ }catch(e){console.error(e);alert("Kategorie konnte nicht geändert werden.");}
+};
+window.kategorieEntfernen=async function(kategorieId,name){
+ if(name==="📦 Sonstiges"){alert("Die Kategorie 'Sonstiges' sollte nicht gelöscht werden.");return;}
+ if(!confirm("Kategorie wirklich löschen? Räume in dieser Kategorie werden nach '📦 Sonstiges' verschoben. Bestehende Meldungen bleiben erhalten."))return;
+ try{
+  const rs=await getDocs(query(raeumeRef,where("kategorie","==",name)));
+  for(const d of rs.docs){await updateDoc(doc(db,"raeume",d.id),{kategorie:"📦 Sonstiges"});}
+  if(kategorieId)await deleteDoc(doc(db,"kategorien",kategorieId));
+ }catch(e){console.error(e);alert("Kategorie konnte nicht gelöscht werden.");}
+};
+function kategorienFirebaseStarten(){
+ standardKategorienInFirebaseAnlegen().catch(e=>console.error("Kategorie-Initialisierung fehlgeschlagen:",e));
+ onSnapshot(kategorienRef,(snapshot)=>{
+  kategorienCloud={}; const namen=[];
+  snapshot.docs.forEach(d=>{const data={id:d.id,...d.data()};kategorienCloud[d.id]=data;if(data.name&&!namen.includes(data.name))namen.push(data.name);});
+  if(!namen.includes("📦 Sonstiges"))namen.push("📦 Sonstiges");
+  raumKategorien=namen.sort((a,b)=>a.localeCompare(b,"de"));
+  kategorienGeladen=true;
+  meldungsKategorieSelectsAktualisieren(); raumKategorieSelectsAktualisieren(); kategorienListeAktualisieren(); raeumeAktualisieren(); anzeigen();
+ },(e)=>{console.error(e);alert("Kategorien konnten nicht aus Firebase geladen werden.");});
+}
 
 function leereRaumStruktur() {
  const daten = {};
@@ -939,33 +1046,11 @@ function raeumeAktualisieren() {
  const raumFilter = document.getElementById("raumSuche") ? document.getElementById("raumSuche").value.toLowerCase().trim() : "";
 
  const verwaltungKategorie = document.getElementById("raumKategorie");
- if (verwaltungKategorie) {
-  const alt = verwaltungKategorie.value;
-  verwaltungKategorie.innerHTML = "";
-  raumKategorien.forEach(kategorie => {
-   const option = document.createElement("option");
-   option.value = kategorie;
-   option.textContent = kategorie;
-   verwaltungKategorie.appendChild(option);
-  });
-  if (alt) verwaltungKategorie.value = alt;
- }
-
  const meldungKategorie = document.getElementById("meldungRaumKategorie");
  const raumSelect = document.getElementById("raumAuswahl");
  const ortWert = document.getElementById("ort") ? document.getElementById("ort").value : "";
 
- if (meldungKategorie) {
-  const aktuelleKategorie = meldungKategorie.value;
-  meldungKategorie.innerHTML = '<option value="">-- Kategorie auswählen --</option>';
-  raumKategorien.forEach(kategorie => {
-   const option = document.createElement("option");
-   option.value = kategorie;
-   option.textContent = kategorie + " (" + ((daten[kategorie] || []).length) + ")";
-   meldungKategorie.appendChild(option);
-  });
-  if (aktuelleKategorie) meldungKategorie.value = aktuelleKategorie;
- }
+ raumKategorieSelectsAktualisieren();
 
  if (raumSelect) {
   const gewaehlteKategorie = meldungKategorie ? meldungKategorie.value : "";
@@ -994,6 +1079,8 @@ function raeumeAktualisieren() {
 
   if (ortWert && alleRaeumeAlsListe().includes(ortWert)) raumSelect.value = ortWert;
  }
+
+ kategorienListeAktualisieren();
 
  const liste = document.getElementById("raumListe");
  if (liste) {
@@ -1224,7 +1311,7 @@ function heuteSetzen() {
 function schadenAuswahlAktualisieren(vorauswahl = "") {
  const bereich = document.getElementById("bereichTyp").value;
  const select = document.getElementById("titelAuswahl");
- const werte = schadenVorlagen[bereich] || schadenVorlagen["Sonstiges"];
+ const werte = schadenVorlagen[bereich] || ["Allgemeine Meldung", "Sonstiges"];
 
  select.innerHTML = "";
  werte.forEach(wert => {
@@ -1598,7 +1685,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.9.2-cloud-pdf-fix",
+  version: "schulmanager-v1.9.3-cloud-kategorien",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1715,7 +1802,7 @@ window.abmelden = function() {
 
 
 
-/* v1.9.2 Cloud PDF Fix */
+/* v1.9.3 Cloud PDF Fix */
 window.datumObjekt=function(wert){if(!wert)return null;const t=String(wert).split("-");if(t.length!==3)return null;return new Date(Number(t[0]),Number(t[1])-1,Number(t[2]))};
 window.datumDeutsch=function(wert){const d=datumObjekt(wert);return d?d.toLocaleDateString("de-DE"):(wert||"")};
 window.datumIso=function(d){return d.toISOString().slice(0,10)};
@@ -1737,7 +1824,7 @@ window.downloadFallback=function(blob,name){const u=URL.createObjectURL(blob);co
 window.berichtPdfErstellen=async function(){const l=berichtGefilterteEintraege();if(!l.length&&!confirm("Für diese Auswahl gibt es keine Meldungen. Trotzdem leere PDF erstellen?"))return;const mitFotos=document.getElementById("berichtMitFotos")&&document.getElementById("berichtMitFotos").checked;if(mitFotos&&l.length>20){if(!confirm("Es wurden mehr als 20 Meldungen ausgewählt. Mit Fotos kann die PDF sehr groß werden. Trotzdem fortfahren?"))return}const blob=await pdfBuilderCloud().build(l,mitFotos);const v=document.getElementById("berichtVon").value||"start",b=document.getElementById("berichtBis").value||"ende";downloadFallback(blob,`SchulManager_Bericht_${v}_bis_${b}.pdf`)};
 
 
-const APP_VERSION = "1.9.2";
+const APP_VERSION = "1.9.3";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");
@@ -1852,6 +1939,7 @@ loginStart();
 heuteSetzen();
 schadenAuswahlAktualisieren();
 fotoVorschauAktualisieren();
+kategorienFirebaseStarten();
 raeumeFirebaseStarten();
 raumPopupInitialisieren();
 
