@@ -1,5 +1,5 @@
 {
-  "version": "1.9.1",
-  "hinweis": "SchulManager Cloud v1.9.1 ist verfügbar.",
-  "changelog": "v1.9.1 Cloud\n- Echter PDF-Bericht statt leerer Druckansicht\n- PDF-Filter nach Zeitraum, Status, Bereich und Raum\n- Optional Fotos in PDF einfügen\n- Maximal 2 Fotos pro Meldung\n- Tab-Menü bleibt erhalten"
+  "version": "1.9.2",
+  "hinweis": "SchulManager Cloud v1.9.2 ist verfügbar.",
+  "changelog": "v1.9.2 Cloud\n- PDF-Button repariert\n- PDF-Funktionen sind jetzt global erreichbar\n- PDF-Bericht mit Filter und optionalen Fotos"
 }

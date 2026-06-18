@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>SchulManager – Hausmeisterportal v1.9.1 PDF Cloud</title>
+<title>SchulManager – Hausmeisterportal v1.9.2 PDF Fix Cloud</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1f3b57">
@@ -482,7 +482,7 @@ th { background:#e8edf3; }
 </div>
 
 <header>
-<h1>SchulManager – Hausmeisterportal v1.9.1 PDF Cloud</h1>
+<h1>SchulManager – Hausmeisterportal v1.9.2 PDF Fix Cloud</h1>
 <p>Cloud-Version mit Tab-Menü, separater Meldungsübersicht und PDF-Bericht</p>
 </header>
 
@@ -561,7 +561,7 @@ th { background:#e8edf3; }
 <h2 id="formularTitel">Neue Meldung erfassen</h2>
 
 <div class="notice small">
-<b>Cloud-Version v1.9.1:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
+<b>Cloud-Version v1.9.2:</b> Meldungen werden über Firebase synchronisiert. Räume können in Kategorien verwaltet und ausgewählt werden.
 </div>
 
 <label>Meldungsbereich</label>
@@ -651,7 +651,7 @@ th { background:#e8edf3; }
 <section id="tab-einstellungen" class="card no-print app-tab">
 <h2>⚙️ Einstellungen / Updates</h2>
 <div class="update-box">
- <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.9.1</span></p>
+ <p><b>Aktuelle Version:</b> <span id="aktuelleVersion">v1.9.2</span></p>
  <p><b>Verfügbare Version:</b> <span id="onlineVersion">Noch nicht geprüft</span></p>
  <button onclick="updatePruefen()">🔄 Auf Updates prüfen</button>
  <button id="updateButton" class="warning hidden" onclick="jetztAktualisieren()">Jetzt aktualisieren</button>
@@ -1598,7 +1598,7 @@ function dashboard() {
 
 window.exportJSON = function() {
  const daten = JSON.stringify({
-  version: "schulmanager-v1.9.1-cloud-pdf",
+  version: "schulmanager-v1.9.2-cloud-pdf-fix",
   erstelltAm: new Date().toISOString(),
   meldungen: eintraege
  }, null, 2);
@@ -1714,7 +1714,30 @@ window.abmelden = function() {
 };
 
 
-const APP_VERSION = "1.9.1";
+
+/* v1.9.2 Cloud PDF Fix */
+window.datumObjekt=function(wert){if(!wert)return null;const t=String(wert).split("-");if(t.length!==3)return null;return new Date(Number(t[0]),Number(t[1])-1,Number(t[2]))};
+window.datumDeutsch=function(wert){const d=datumObjekt(wert);return d?d.toLocaleDateString("de-DE"):(wert||"")};
+window.datumIso=function(d){return d.toISOString().slice(0,10)};
+window.textOhneEmoji=function(text){return String(text||"").replace(/[\u{1F300}-\u{1FAFF}]/gu,"").replace(/[🔵🟢🟠🚻🔧🪑🧹🔑🚨📅📦🌳🏫📄💾]/g,"").trim()};
+window.berichtPopupOeffnen=function(){document.getElementById("berichtModal").style.display="flex";if(!document.getElementById("berichtVon").value)berichtZeitraumSetzen("monat");else berichtVorschauAktualisieren()};
+window.berichtPopupSchliessen=function(){document.getElementById("berichtModal").style.display="none"};
+window.berichtPopupHintergrundSchliessen=function(e){if(e.target&&e.target.id==="berichtModal")berichtPopupSchliessen()};
+window.berichtZeitraumSetzen=function(art){const h=new Date();let v=new Date(h),b=new Date(h);if(art==="monat"){v=new Date(h.getFullYear(),h.getMonth(),1);b=new Date(h.getFullYear(),h.getMonth()+1,0)}if(art==="woche"){const tag=(h.getDay()+6)%7;v=new Date(h);v.setDate(h.getDate()-tag);b=new Date(v);b.setDate(v.getDate()+6)}document.getElementById("berichtVon").value=datumIso(v);document.getElementById("berichtBis").value=datumIso(b);berichtVorschauAktualisieren()};
+window.berichtGefilterteEintraege=function(){const v=datumObjekt(document.getElementById("berichtVon").value),b=datumObjekt(document.getElementById("berichtBis").value),s=document.getElementById("berichtStatus").value,ber=document.getElementById("berichtBereich").value,raum=document.getElementById("berichtRaum").value.toLowerCase().trim(),sort=document.getElementById("berichtSortierung").value;let l=[...eintraege];if(v)l=l.filter(e=>datumObjekt(e.datum)&&datumObjekt(e.datum)>=v);if(b)l=l.filter(e=>datumObjekt(e.datum)&&datumObjekt(e.datum)<=b);if(s!=="Alle Status")l=l.filter(e=>(e.status||"🟠 Offen")===s);if(ber!=="Alle Bereiche")l=l.filter(e=>e.bereichTyp===ber);if(raum)l=l.filter(e=>String(e.ort||"").toLowerCase().includes(raum));l.sort((a,b)=>sort==="datumAlt"?String(a.datum||"").localeCompare(String(b.datum||"")):sort==="raum"?String(a.ort||"").localeCompare(String(b.ort||""),"de"):String(b.datum||"").localeCompare(String(a.datum||"")));return l};
+window.berichtVorschauAktualisieren=function(){const box=document.getElementById("berichtVorschau");if(!box)return;const l=berichtGefilterteEintraege();const o=l.filter(e=>(e.status||"🟠 Offen")==="🟠 Offen").length,ba=l.filter(e=>(e.status||"")==="🔵 In Bearbeitung").length,er=l.filter(e=>(e.status||"")==="🟢 Erledigt").length;const mitFotos=document.getElementById("berichtMitFotos")&&document.getElementById("berichtMitFotos").checked;box.textContent=`Auswahl: ${l.length} Meldung(en)\nFotos: ${mitFotos?"ja, max. 2 pro Meldung":"nein"}\nOffen: ${o} | In Bearbeitung: ${ba} | Erledigt: ${er}\n\n`+(l.slice(0,6).map(e=>`${datumDeutsch(e.datum)} | ${textOhneEmoji(e.status||"Offen")} | ${e.ort||"-"} | ${e.titel||"-"}`).join("\n")||"Keine Meldungen für diese Auswahl.")};
+window.pdfSafeText=function(text){return String(text||"").replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/Ä/g,"Ae").replace(/Ö/g,"Oe").replace(/Ü/g,"Ue").replace(/ß/g,"ss").replace(/–/g,"-").replace(/—/g,"-").replace(/„/g,'"').replace(/“/g,'"').replace(/’/g,"'")};
+window.pdfEscape=function(t){return pdfSafeText(t).replace(/\\/g,"\\\\").replace(/\(/g,"\\(").replace(/\)/g,"\\)").replace(/\r?\n/g," ")};
+window.wrapText=function(t,max){const w=String(t||"").replace(/\s+/g," ").trim().split(" ");const lines=[];let line="";w.forEach(x=>{if((line+" "+x).trim().length>max){if(line)lines.push(line);line=x}else line=(line+" "+x).trim()});if(line)lines.push(line);return lines.length?lines:[""]};
+window.base64ZuHex=function(base64){const bin=atob(base64);let hex="";for(let i=0;i<bin.length;i++){hex+=bin.charCodeAt(i).toString(16).padStart(2,"0");if(i%64===63)hex+="\n"}return hex};
+window.ladeBild=function(src){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src})};
+window.bildFuerPdf=async function(src){try{const img=await ladeBild(src);const maxW=700,maxH=500;let w=img.width,h=img.height;const scale=Math.min(maxW/w,maxH/h,1);w=Math.max(1,Math.round(w*scale));h=Math.max(1,Math.round(h*scale));const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;canvas.getContext("2d").drawImage(img,0,0,w,h);const base64=canvas.toDataURL("image/jpeg",0.58).split(",")[1];return{width:w,height:h,hex:base64ZuHex(base64)}}catch(error){console.error("Bild konnte nicht für PDF verarbeitet werden:",error);return null}};
+window.pdfBuilderCloud=function(){const W=595.28,H=841.89,M=42;const objs=[];const addObj=s=>{objs.push(s);return objs.length};const fontObj=addObj("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");const pages=[];let current=null,imgNr=1;function newPage(){current={content:"",images:[],y:H-M};pages.push(current)}function ensurePage(){if(!current)newPage()}function addText(text,size=10,gap=14){ensurePage();if(current.y<M+24)newPage();const safe=pdfEscape(text).slice(0,105);current.content+=`BT /F1 ${size} Tf 1 0 0 1 ${M} ${current.y.toFixed(2)} Tm (${safe}) Tj ET\n`;current.y-=gap}function addEmpty(gap=10){ensurePage();current.y-=gap;if(current.y<M+24)newPage()}function addLine(){addText("------------------------------------------------------------",10,14)}function wrapAndAdd(prefix,text){wrapText(prefix+(text||"-"),85).forEach(l=>addText(l,10,14))}function addImage(pdfImg){ensurePage();if(!pdfImg)return;const maxPdfW=250,maxPdfH=170;const sc=Math.min(maxPdfW/pdfImg.width,maxPdfH/pdfImg.height,1);const drawW=Math.round(pdfImg.width*sc),drawH=Math.round(pdfImg.height*sc);if(current.y-drawH<M+20)newPage();const imgObj=addObj(`<< /Type /XObject /Subtype /Image /Width ${pdfImg.width} /Height ${pdfImg.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter [/ASCIIHexDecode /DCTDecode] /Length ${pdfImg.hex.length+1} >>\nstream\n${pdfImg.hex}>\nendstream`);const name="Im"+(imgNr++);current.images.push({name,obj:imgObj});const x=M,y=current.y-drawH;current.content+=`q\n${drawW} 0 0 ${drawH} ${x} ${y.toFixed(2)} cm\n/${name} Do\nQ\n`;current.y-=drawH+12}async function build(liste,mitFotos){newPage();const v=document.getElementById("berichtVon").value,b=document.getElementById("berichtBis").value,s=document.getElementById("berichtStatus").value,ber=document.getElementById("berichtBereich").value,raum=document.getElementById("berichtRaum").value.trim();const offen=liste.filter(e=>(e.status||"🟠 Offen")==="🟠 Offen").length,bearb=liste.filter(e=>(e.status||"")==="🔵 In Bearbeitung").length,erl=liste.filter(e=>(e.status||"")==="🟢 Erledigt").length;addText("SchulManager Hausmeisterbericht",16,24);addText("Erstellt am: "+new Date().toLocaleString("de-DE"));addText("Zeitraum: "+(v?datumDeutsch(v):"offen")+" bis "+(b?datumDeutsch(b):"offen"));addText("Statusfilter: "+textOhneEmoji(s));addText("Bereich: "+textOhneEmoji(ber));if(raum)addText("Raum enthaelt: "+raum);addEmpty(6);addText("Zusammenfassung:",12,16);addText("Gesamt: "+liste.length+" | Offen: "+offen+" | In Bearbeitung: "+bearb+" | Erledigt: "+erl);addEmpty(8);addText("Meldungen:",12,16);addLine();if(!liste.length)addText("Keine Meldungen fuer diese Auswahl vorhanden.");for(let idx=0;idx<liste.length;idx++){const e=liste[idx];addText((idx+1)+". "+datumDeutsch(e.datum)+" "+(e.uhrzeit||"")+" | "+textOhneEmoji(e.status||"Offen"),11,16);addText("Ort: "+(e.ort||"-"));addText("Bereich: "+textOhneEmoji(e.bereichTyp||"-"));addText("Meldung: "+(e.titel||"-"));wrapAndAdd("Beschreibung: ",e.beschreibung);wrapAndAdd("Massnahme/Notiz: ",e.massnahme);addText("Gemeldet von: "+(e.gemeldetVon||"-")+" | Bearbeitet von: "+(e.bearbeitetVon||"-"));if(mitFotos&&e.fotos&&e.fotos.length){addText("Fotos:",10,14);for(const foto of e.fotos.slice(0,2)){addImage(await bildFuerPdf(foto))}}else{addText("Fotos: "+((e.fotos||[]).length))}addLine()}const pageRefs=[];pages.forEach(p=>{const xobj=p.images.length?"/XObject << "+p.images.map(im=>`/${im.name} ${im.obj} 0 R`).join(" ")+" >>":"";const streamObj=addObj(`<< /Length ${p.content.length} >>\nstream\n${p.content}\nendstream`);const pageObj=addObj(`<< /Type /Page /Parent PAGES_REF /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 ${fontObj} 0 R >> ${xobj} >> /Contents ${streamObj} 0 R >>`);pageRefs.push(pageObj)});const pagesObj=addObj(`<< /Type /Pages /Kids [${pageRefs.map(n=>n+" 0 R").join(" ")}] /Count ${pageRefs.length} >>`);const catalog=addObj(`<< /Type /Catalog /Pages ${pagesObj} 0 R >>`);for(let i=0;i<objs.length;i++)objs[i]=objs[i].replaceAll("PAGES_REF",pagesObj+" 0 R");let pdf="%PDF-1.4\n";const offsets=[0];objs.forEach((o,i)=>{offsets.push(pdf.length);pdf+=`${i+1} 0 obj\n${o}\nendobj\n`});const xref=pdf.length;pdf+=`xref\n0 ${objs.length+1}\n0000000000 65535 f \n`;for(let i=1;i<offsets.length;i++)pdf+=String(offsets[i]).padStart(10,"0")+" 00000 n \n";pdf+=`trailer\n<< /Size ${objs.length+1} /Root ${catalog} 0 R >>\nstartxref\n${xref}\n%%EOF`;return new Blob([pdf],{type:"application/pdf"})}return{build}};
+window.downloadFallback=function(blob,name){const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},1000)};
+window.berichtPdfErstellen=async function(){const l=berichtGefilterteEintraege();if(!l.length&&!confirm("Für diese Auswahl gibt es keine Meldungen. Trotzdem leere PDF erstellen?"))return;const mitFotos=document.getElementById("berichtMitFotos")&&document.getElementById("berichtMitFotos").checked;if(mitFotos&&l.length>20){if(!confirm("Es wurden mehr als 20 Meldungen ausgewählt. Mit Fotos kann die PDF sehr groß werden. Trotzdem fortfahren?"))return}const blob=await pdfBuilderCloud().build(l,mitFotos);const v=document.getElementById("berichtVon").value||"start",b=document.getElementById("berichtBis").value||"ende";downloadFallback(blob,`SchulManager_Bericht_${v}_bis_${b}.pdf`)};
+
+
+const APP_VERSION = "1.9.2";
 
 window.updatePruefen = async function() {
  const onlineVersion = document.getElementById("onlineVersion");

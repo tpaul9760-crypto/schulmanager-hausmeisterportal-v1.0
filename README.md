@@ -1,7 +1,3 @@
-SchulManager Cloud v1.9.1 PDF
+SchulManager Cloud v1.9.2 PDF Fix
 
-Neu:
-- echter PDF-Bericht statt leerer Druckansicht
-- Filterfenster
-- optional Fotos im PDF, max. 2 pro Meldung
-- Firebase-Datenstruktur unverändert
+PDF-Button repariert. Dateien auf GitHub ersetzen, danach Cache/Service Worker aktualisieren.
